@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin_layout :: layout(pageTitle = ~{::title}, pageContent = ~{::.page-content-wrapper}, pageScripts = ~{::.page-scripts-wrapper})}">
+<head><title>Admin Dashboard</title></head>
+<body>
+<div class="page-content-wrapper">
+    <div class="container">
+        <div class="header">
+            <h1>Dashboard</h1>
+        </div>
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="p-4 bg-primary text-white rounded">
+                    <h3>Tổng Người Dùng</h3>
+                    <h2 th:text="${totalUsers}">0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-4 bg-success text-white rounded">
+                    <h3>Tổng Khóa Học</h3>
+                    <h2>0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-4 bg-warning text-dark rounded">
+                    <h3>Tổng Đơn Hàng</h3>
+                    <h2>0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-4 bg-danger text-white rounded">
+                    <h3>Tổng Doanh Thu</h3>
+                    <h2>0 VNĐ</h2>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info">Chào mừng bạn đến với trang quản trị!</div>
+    </div>
+</div>
+<th:block class="page-scripts-wrapper"></th:block>
+</body>
+</html>
