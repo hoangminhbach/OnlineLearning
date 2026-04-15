@@ -2,7 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.model.User;
 import com.example.demo.model.UserRole;
+import com.example.demo.model.CourseCategory;
 import com.example.demo.service.UserService;
+import com.example.demo.service.CourseCategoryService;
 import com.example.demo.repository.RoleRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,10 +22,12 @@ public class AdminController {
 
     private final UserService userService;
     private final RoleRepository roleRepository;
+    private final CourseCategoryService categoryService;
 
-    public AdminController(UserService userService, RoleRepository roleRepository) {
+    public AdminController(UserService userService, RoleRepository roleRepository, CourseCategoryService categoryService) {
         this.userService = userService;
         this.roleRepository = roleRepository;
+        this.categoryService = categoryService;
     }
 
     @GetMapping("/admin")
@@ -101,5 +105,53 @@ public class AdminController {
         userService.deleteById(id);
         ra.addFlashAttribute("success", "Xóa người dùng thành công!");
         return "redirect:/admin/users";
+    }
+
+    // ==================== COURSE CATEGORY ====================
+    @GetMapping("/admin/course_categories")
+    public String getCourseCategories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(required = false) String search,
+            Model model) {
+
+        Page<CourseCategory> categories = categoryService.findAll(PageRequest.of(page, size));
+        model.addAttribute("categories", categories);
+        model.addAttribute("currentPage", page);
+        return "admin/courseCategory/list";
+    }
+
+    @GetMapping("/admin/course_categories/create")
+    public String createCategoryForm(Model model) {
+        model.addAttribute("category", new CourseCategory());
+        return "admin/courseCategory/create";
+    }
+
+    @PostMapping("/admin/course_categories/create")
+    public String createCategory(@ModelAttribute CourseCategory category, RedirectAttributes ra) {
+        categoryService.save(category);
+        ra.addFlashAttribute("success", "Tạo danh mục thành công!");
+        return "redirect:/admin/course_categories";
+    }
+
+    @GetMapping("/admin/course_categories/update/{id}")
+    public String updateCategoryForm(@PathVariable Long id, Model model) {
+        model.addAttribute("category", categoryService.findById(id));
+        return "admin/courseCategory/update";
+    }
+
+    @PostMapping("/admin/course_categories/update")
+    public String updateCategory(@ModelAttribute CourseCategory category, RedirectAttributes ra) {
+        categoryService.update(category);
+        ra.addFlashAttribute("success", "Cập nhật danh mục thành công!");
+        return "redirect:/admin/course_categories";
+    }
+
+    @GetMapping("/admin/course_categories/delete/{id}")
+    public String deleteCategory(@PathVariable Long id, RedirectAttributes ra) {
+        categoryService.deleteById(id);
+        ra.addFlashAttribute("success", "Xóa danh mục thành công!");
+        return "redirect:/admin/course_categories";
     }
 }
