@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.model.User;
+import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,10 +11,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -33,10 +36,24 @@ public class UserService {
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
+        if (user.getRole() != null && user.getRole().getId() != null) {
+            user.setRole(roleRepository.findById(user.getRole().getId()).orElse(user.getRole()));
+        }
         return userRepository.save(user);
     }
 
     public User update(User user) {
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        } else {
+            User existing = findById(user.getId());
+            if (existing != null) {
+                user.setPassword(existing.getPassword());
+            }
+        }
+        if (user.getRole() != null && user.getRole().getId() != null) {
+            user.setRole(roleRepository.findById(user.getRole().getId()).orElse(user.getRole()));
+        }
         return userRepository.save(user);
     }
 
