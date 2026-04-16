@@ -11,24 +11,24 @@
         </div>
 
         <form th:action="@{/admin/course_categories/create}" th:object="${category}" method="post" class="col-md-6 mx-auto">
-            <div class="mb-3">
-                <label for="name" class="form-label">Tên danh mục *</label>
-                <input type="text" th:field="*{name}" class="form-control" required>
+            <div class="form-group">
+                <label class="required">Tên danh mục</label>
+                <input type="text" th:field="*{name}" class="input-field" placeholder="Nhập tên danh mục" required>
             </div>
 
-            <div class="mb-3">
-                <label for="description" class="form-label">Mô tả</label>
-                <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
+            <div class="form-group">
+                <label>Mô tả</label>
+                <textarea th:field="*{description}" class="input-field" rows="3" placeholder="Nhập mô tả danh mục"></textarea>
             </div>
 
-            <div class="mb-3">
-                <div class="form-check">
-                    <input type="checkbox" th:field="*{active}" class="form-check-input" checked>
-                    <label class="form-check-label">Hoạt động</label>
-                </div>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" th:field="*{active}" th:value="true" checked>
+                    <span>Hoạt động</span>
+                </label>
             </div>
 
-            <button type="submit" class="btn btn-primary">Tạo</button>
+            <button type="submit" class="submit-btn">Tạo</button>
         </form>
     </div>
 </div>

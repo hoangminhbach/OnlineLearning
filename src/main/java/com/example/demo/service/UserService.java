@@ -24,6 +24,10 @@ public class UserService {
         return userRepository.findAll(pageable);
     }
 
+    public Page<User> findWithFilters(String keyword, Long roleId, Boolean enabled, Pageable pageable) {
+        return userRepository.findWithFilters(keyword, roleId, enabled, pageable);
+    }
+
     public User findById(Long id) {
         return userRepository.findById(id).orElse(null);
     }
@@ -40,6 +44,50 @@ public class UserService {
             user.setRole(roleRepository.findById(user.getRole().getId()).orElse(user.getRole()));
         }
         return userRepository.save(user);
+    }
+
+    public void createUser(User user, Long roleId) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new IllegalArgumentException("Email đã tồn tại!");
+        }
+        user.setRole(roleRepository.findById(roleId)
+                .orElseThrow(() -> new IllegalArgumentException("Role not found")));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+    }
+
+    public void updateUser(Long id, User userDetails, Long roleId) {
+        User user = findById(id);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        user.setFullName(userDetails.getFullName());
+        user.setEmail(userDetails.getEmail());
+        user.setMobile(userDetails.getMobile());
+        user.setAddress(userDetails.getAddress());
+        user.setGender(userDetails.getGender());
+        user.setDob(userDetails.getDob());
+        user.setEnabled(userDetails.isEnabled());
+        if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+        }
+        if (roleId != null) {
+            user.setRole(roleRepository.findById(roleId)
+                    .orElseThrow(() -> new IllegalArgumentException("Role not found")));
+        }
+        userRepository.save(user);
+    }
+
+    public void toggleUserStatus(Long id) {
+        User user = findById(id);
+        if (user != null) {
+            user.setEnabled(!user.isEnabled());
+            userRepository.save(user);
+        }
+    }
+
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
     }
 
     public User update(User user) {
@@ -62,6 +110,10 @@ public class UserService {
     }
 
     public long count() {
+        return userRepository.count();
+    }
+
+    public long countUsers() {
         return userRepository.count();
     }
 }

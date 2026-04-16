@@ -3,19 +3,23 @@ package com.example.demo.controller;
 import com.example.demo.model.User;
 import com.example.demo.model.UserRole;
 import com.example.demo.model.CourseCategory;
+import com.example.demo.model.Course;
 import com.example.demo.model.Order;
 import com.example.demo.model.Slider;
 import com.example.demo.model.dto.OrderFilter;
+import com.example.demo.model.enums.CourseStatus;
 import com.example.demo.model.enums.OrderStatus;
 import com.example.demo.model.enums.SliderStatus;
 import com.example.demo.service.UserService;
 import com.example.demo.service.CourseCategoryService;
+import com.example.demo.service.CourseService;
 import com.example.demo.service.OrderService;
 import com.example.demo.service.SliderService;
 import com.example.demo.service.UploadService;
 import com.example.demo.repository.RoleRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -24,7 +28,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class AdminController {
@@ -32,16 +38,19 @@ public class AdminController {
     private final UserService userService;
     private final RoleRepository roleRepository;
     private final CourseCategoryService categoryService;
+    private final CourseService courseService;
     private final OrderService orderService;
     private final SliderService sliderService;
     private final UploadService uploadService;
 
     public AdminController(UserService userService, RoleRepository roleRepository,
-                          CourseCategoryService categoryService, OrderService orderService,
-                          SliderService sliderService, UploadService uploadService) {
+                          CourseCategoryService categoryService, CourseService courseService,
+                          OrderService orderService, SliderService sliderService,
+                          UploadService uploadService) {
         this.userService = userService;
         this.roleRepository = roleRepository;
         this.categoryService = categoryService;
+        this.courseService = courseService;
         this.orderService = orderService;
         this.sliderService = sliderService;
         this.uploadService = uploadService;
@@ -54,30 +63,37 @@ public class AdminController {
             User user = userService.findByEmail(email);
             model.addAttribute("currentUser", user);
         }
-        model.addAttribute("totalUsers", userService.count());
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalUsers", userService.count());
+        stats.put("totalCategories", categoryService.count());
+        stats.put("totalCourses", courseService.countCourses());
+        stats.put("totalOrders", orderService.count());
+        stats.put("totalRevenue", orderService.getTotalRevenue());
+        stats.put("pendingCourses", courseService.countByStatus(CourseStatus.PENDING));
+        stats.put("approvedCourses", courseService.countByStatus(CourseStatus.APPROVED));
+        stats.put("rejectedCourses", courseService.countByStatus(CourseStatus.REJECTED));
+        stats.put("pendingOrders", orderService.countByStatus(OrderStatus.PENDING));
+        stats.put("successOrders", orderService.countByStatus(OrderStatus.SUCCESS));
+        stats.put("failedOrders", orderService.countByStatus(OrderStatus.FAILED));
+        model.addAttribute("stats", stats);
         return "admin/dashboard";
     }
 
     @GetMapping("/admin/users")
     public String getUsers(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(required = false) Long roleId,
+            @RequestParam(required = false) Boolean enabled,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String gender,
-            @RequestParam(required = false) String role,
-            @RequestParam(required = false) Boolean enabled,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String sort,
             Model model) {
 
-        Sort sortObj = Sort.by(Sort.Direction.DESC, "id");
-        if (sort != null) {
-            sortObj = Sort.by(Sort.Direction.ASC, sort);
-        }
-
-        Page<User> users = userService.findAll(PageRequest.of(page, size, sortObj));
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<User> users = userService.findWithFilters(keyword, roleId, enabled, pageable);
         model.addAttribute("users", users);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", users.getTotalPages());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("roleId", roleId);
+        model.addAttribute("enabled", enabled);
 
         return "admin/userList";
     }
@@ -87,16 +103,17 @@ public class AdminController {
         model.addAttribute("user", new User());
         List<UserRole> roles = roleRepository.findAll();
         model.addAttribute("roles", roles);
+        model.addAttribute("genders", User.Gender.values());
         return "admin/createUser";
     }
 
     @PostMapping("/admin/users/create")
-    public String createUser(@ModelAttribute User user, RedirectAttributes ra) {
+    public String createUser(@ModelAttribute User user, @RequestParam Long roleId, RedirectAttributes ra) {
         try {
-            userService.save(user);
+            userService.createUser(user, roleId);
             ra.addFlashAttribute("success", "Tạo người dùng thành công!");
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "Email đã tồn tại!");
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/users";
     }
@@ -104,22 +121,36 @@ public class AdminController {
     @GetMapping("/admin/users/update/{id}")
     public String updateUserForm(@PathVariable Long id, Model model) {
         User user = userService.findById(id);
+        if (user != null) {
+            model.addAttribute("user", user);
+        }
         List<UserRole> roles = roleRepository.findAll();
-        model.addAttribute("user", user);
         model.addAttribute("roles", roles);
+        model.addAttribute("genders", User.Gender.values());
         return "admin/updateUser";
     }
 
-    @PostMapping("/admin/users/update")
-    public String updateUser(@ModelAttribute User user, RedirectAttributes ra) {
-        userService.update(user);
-        ra.addFlashAttribute("success", "Cập nhật người dùng thành công!");
+    @PostMapping("/admin/users/update/{id}")
+    public String updateUser(@PathVariable Long id, @ModelAttribute User user, @RequestParam Long roleId, RedirectAttributes ra) {
+        try {
+            userService.updateUser(id, user, roleId);
+            ra.addFlashAttribute("success", "Cập nhật người dùng thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/users";
     }
 
-    @GetMapping("/admin/users/delete/{id}")
+    @PostMapping("/admin/users/toggle/{id}")
+    public String toggleUserStatus(@PathVariable Long id, RedirectAttributes ra) {
+        userService.toggleUserStatus(id);
+        ra.addFlashAttribute("success", "Thay đổi trạng thái thành công!");
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/admin/users/delete/{id}")
     public String deleteUser(@PathVariable Long id, RedirectAttributes ra) {
-        userService.deleteById(id);
+        userService.deleteUser(id);
         ra.addFlashAttribute("success", "Xóa người dùng thành công!");
         return "redirect:/admin/users";
     }
@@ -127,15 +158,17 @@ public class AdminController {
     // ==================== COURSE CATEGORY ====================
     @GetMapping("/admin/course_categories")
     public String getCourseCategories(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(required = false) Boolean active,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Boolean active,
-            @RequestParam(required = false) String search,
             Model model) {
 
-        Page<CourseCategory> categories = categoryService.findAll(PageRequest.of(page, size));
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<CourseCategory> categories = categoryService.findWithFilters(keyword, active, pageable);
         model.addAttribute("categories", categories);
-        model.addAttribute("currentPage", page);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("active", active);
         return "admin/courseCategory/list";
     }
 
@@ -147,29 +180,83 @@ public class AdminController {
 
     @PostMapping("/admin/course_categories/create")
     public String createCategory(@ModelAttribute CourseCategory category, RedirectAttributes ra) {
-        categoryService.save(category);
-        ra.addFlashAttribute("success", "Tạo danh mục thành công!");
+        try {
+            categoryService.createCategory(category);
+            ra.addFlashAttribute("success", "Tạo danh mục thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/course_categories";
     }
 
     @GetMapping("/admin/course_categories/update/{id}")
     public String updateCategoryForm(@PathVariable Long id, Model model) {
-        model.addAttribute("category", categoryService.findById(id));
+        CourseCategory category = categoryService.findById(id);
+        if (category != null) {
+            model.addAttribute("category", category);
+        }
         return "admin/courseCategory/update";
     }
 
-    @PostMapping("/admin/course_categories/update")
-    public String updateCategory(@ModelAttribute CourseCategory category, RedirectAttributes ra) {
-        categoryService.update(category);
-        ra.addFlashAttribute("success", "Cập nhật danh mục thành công!");
+    @PostMapping("/admin/course_categories/update/{id}")
+    public String updateCategory(@PathVariable Long id, @ModelAttribute CourseCategory category, RedirectAttributes ra) {
+        try {
+            categoryService.updateCategory(id, category);
+            ra.addFlashAttribute("success", "Cập nhật danh mục thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/course_categories";
     }
 
-    @GetMapping("/admin/course_categories/delete/{id}")
+    @PostMapping("/admin/course_categories/delete/{id}")
     public String deleteCategory(@PathVariable Long id, RedirectAttributes ra) {
-        categoryService.deleteById(id);
+        categoryService.deleteCategory(id);
         ra.addFlashAttribute("success", "Xóa danh mục thành công!");
         return "redirect:/admin/course_categories";
+    }
+
+    // ==================== COURSE MANAGEMENT ====================
+    @GetMapping("/courses/admin")
+    public String courses(@RequestParam(defaultValue = "") String keyword,
+                         @RequestParam(required = false) CourseStatus status,
+                         @RequestParam(required = false) Long categoryId,
+                         @RequestParam(required = false) Long expertId,
+                         @RequestParam(required = false) Boolean isFeatured,
+                         @RequestParam(defaultValue = "0") int page,
+                         @RequestParam(defaultValue = "10") int size,
+                         Model model) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Course> courses = courseService.findForAdmin(keyword, status, categoryId, expertId, isFeatured, pageable);
+        model.addAttribute("courses", courses);
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("status", status);
+        model.addAttribute("categoryId", categoryId);
+        model.addAttribute("expertId", expertId);
+        model.addAttribute("isFeatured", isFeatured);
+        return "admin/course/courseDashboard";
+    }
+
+    @PostMapping("/courses/admin/approve/{id}")
+    public String approveCourse(@PathVariable Long id, RedirectAttributes ra) {
+        courseService.approveCourse(id);
+        ra.addFlashAttribute("success", "Duyệt khóa học thành công!");
+        return "redirect:/courses/admin";
+    }
+
+    @PostMapping("/courses/admin/reject/{id}")
+    public String rejectCourse(@PathVariable Long id, RedirectAttributes ra) {
+        courseService.rejectCourse(id);
+        ra.addFlashAttribute("success", "Từ chối khóa học thành công!");
+        return "redirect:/courses/admin";
+    }
+
+    @PostMapping("/courses/admin/featured/{id}")
+    public String toggleFeatured(@PathVariable Long id, RedirectAttributes ra) {
+        courseService.toggleFeatured(id);
+        ra.addFlashAttribute("success", "Thay đổi nổi bật thành công!");
+        return "redirect:/courses/admin";
     }
 
     // ==================== ORDER MANAGEMENT ====================

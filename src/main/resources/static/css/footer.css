@@ -1,0 +1,22 @@
+/* footer.css - Footer styles */
+
+footer {
+    background: var(--text-color);
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    margin-top: 4rem;
+}
+
+.footer-content { max-width: 1400px; margin: 0 auto; }
+
+@media (max-width: 1024px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+}
+
+@media (max-width: 768px) {
+    .hero-slider { height: 400px; }
+    .slide-content h2 { font-size: 2rem; }
+    .courses-grid, .posts-grid { grid-template-columns: 1fr; }
+}

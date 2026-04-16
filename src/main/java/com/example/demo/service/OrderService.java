@@ -75,6 +75,10 @@ public class OrderService {
         return orderRepository.count();
     }
 
+    public long count() {
+        return orderRepository.count();
+    }
+
     public long countByStatus(OrderStatus status) {
         return orderRepository.countByStatus(status);
     }
