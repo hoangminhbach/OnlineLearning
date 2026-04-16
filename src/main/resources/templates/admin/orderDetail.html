@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin_layout :: layout(pageTitle = ~{::title}, pageContent = ~{::.page-content-wrapper}, pageScripts = ~{::.page-scripts-wrapper})}">
+<head><title>Chi Tiết Đơn Hàng</title></head>
+<body>
+<div class="page-content-wrapper">
+    <div class="container">
+        <div class="header">
+            <h1>Chi Tiết Đơn Hàng</h1>
+            <a th:href="@{/admin/orders}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Quay Lại
+            </a>
+        </div>
+
+        <div th:if="${order != null}">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Thông Tin Đơn Hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Mã Đơn:</strong></td>
+                                    <td th:text="${order.orderCode}">ORD-001</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Số Tiền:</strong></td>
+                                    <td th:text="${#numbers.formatDecimal(order.amount, 1, 'POINT', 0, 'POINT')} + ' VNĐ'">100,000 VNĐ</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Trạng Thái:</strong></td>
+                                    <td>
+                                        <span th:class="${order.status == 'SUCCESS' ? 'badge bg-success' : (order.status == 'FAILED' ? 'badge bg-danger' : (order.status == 'REFUNDED' ? 'badge bg-info' : 'badge bg-warning'))}"
+                                              th:text="${order.status}">PENDING</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ngày Đặt:</strong></td>
+                                    <td th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">01/01/2024</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mã Giao Dịch:</strong></td>
+                                    <td th:text="${order.vnpTransactionNo ?: '-'}">VNPAY123</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Thông Tin Khách Hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Tên:</strong></td>
+                                    <td th:text="${order.user?.fullName}">Nguyen Van A</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email:</strong></td>
+                                    <td th:text="${order.user?.email}">email@example.com</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Thông Tin Khóa Học</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Tên Khóa Học:</strong></td>
+                                    <td th:text="${order.course?.name}">Course Name</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Giá:</strong></td>
+                                    <td th:text="${#numbers.formatDecimal(order.course?.price, 1, 'POINT', 0, 'POINT')} + ' VNĐ'">100,000 VNĐ</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Cập Nhật Trạng Thái</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="row g-3">
+                        <div class="col-md-4">
+                            <select name="status" class="form-select">
+                                <option th:each="s : ${T(com.example.demo.model.enums.OrderStatus).values()}"
+                                        th:value="${s}" th:text="${s}">Status</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary">Cập Nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${order == null}" class="alert alert-warning">
+            Không tìm thấy đơn hàng!
+        </div>
+    </div>
+</div>
+<th:block class="page-scripts-wrapper"></th:block>
+</body>
+</html>

@@ -18,4 +18,6 @@ public interface SliderRepository extends JpaRepository<Slider, Long> {
     Page<Slider> findWithFilters(@Param("keyword") String keyword,
                                 @Param("status") SliderStatus status,
                                 Pageable pageable);
+
+    Page<Slider> findByStatus(SliderStatus status, Pageable pageable);
 }
