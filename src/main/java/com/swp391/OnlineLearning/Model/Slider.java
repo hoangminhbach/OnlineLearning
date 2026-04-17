@@ -1,58 +1,49 @@
 package com.swp391.OnlineLearning.Model;
 
+import com.swp391.OnlineLearning.Model.enums.SliderStatus;
 import jakarta.persistence.*;
-import lombok.*;
 
-import java.time.LocalDateTime;
-
-@Getter
-@Setter
-@NoArgsConstructor
 @Entity
 @Table(name = "sliders")
-public class Slider {
+public class Slider extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Quan hệ N-1: Mỗi Slider thuộc về 1 User
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)  // liên kết với khóa ngoại users.id
-    private User user;
-
-    @Column(nullable = false, columnDefinition = "NVARCHAR(100)")
+    @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "order_number", nullable = false)
-    private Integer orderNumber = 1;
-
-    @Column(nullable = false, columnDefinition = "VARCHAR(10)")
-    private String status; //  ("ACTIVE", "INACTIVE")
-
-    @Column(name = "image_url")
-    private String imageUrl;
-
-    @Column(name = "link_url")
+    @Column(name = "link_url", length = 500)
     private String linkUrl;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SliderStatus status = SliderStatus.PENDING;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    @Column(name = "order_number")
+    private Integer orderNumber;
 
-    @Column(name = "view_count")
-    private Long viewCount = 0L;
+    @Column(name = "image_url", nullable = false, length = 500)
+    private String imageUrl;
 
-    // --- Optional: cập nhật thời gian mỗi khi thay đổi ---
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    public Slider() {}
 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public String getLinkUrl() { return linkUrl; }
+    public void setLinkUrl(String linkUrl) { this.linkUrl = linkUrl; }
+    public SliderStatus getStatus() { return status; }
+    public void setStatus(SliderStatus status) { this.status = status; }
+    public Integer getOrderNumber() { return orderNumber; }
+    public void setOrderNumber(Integer orderNumber) { this.orderNumber = orderNumber; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }
-
