@@ -29,3 +29,9 @@ buildNumber.properties
 *.iws
 *.iml
 *.ipr
+
+.agent/
+.agents/
+.cursor/
+diagram/
+openspec/
