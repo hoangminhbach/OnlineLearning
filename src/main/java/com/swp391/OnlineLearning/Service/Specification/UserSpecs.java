@@ -1,4 +1,4 @@
-package com.swp391.OnlineLearning.Service.Specification;
+package com.swp391.OnlineLearning.service.Specification;
 
 import com.swp391.OnlineLearning.Model.User;
 import com.swp391.OnlineLearning.Model.User.Gender;

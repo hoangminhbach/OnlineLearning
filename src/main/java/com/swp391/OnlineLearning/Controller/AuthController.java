@@ -2,7 +2,9 @@ package com.swp391.OnlineLearning.Controller;
 
 import com.swp391.OnlineLearning.Model.User;
 import com.swp391.OnlineLearning.Model.dto.UserDTO;
-import com.swp391.OnlineLearning.Service.*;
+import com.swp391.OnlineLearning.service.UserService;
+import com.swp391.OnlineLearning.service.TokenService;
+import com.swp391.OnlineLearning.service.EmailService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

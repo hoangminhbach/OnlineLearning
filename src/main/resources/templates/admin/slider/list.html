@@ -24,7 +24,7 @@
                 <label>Trạng thái</label>
                 <select name="status" class="input-field">
                     <option value="">Trạng thái</option>
-                    <option th:each="s : ${T(com.example.demo.model.enums.SliderStatus).values()}"
+                    <option th:each="s : ${T(com.swp391.OnlineLearning.Model.enums.SliderStatus).values()}"
                             th:value="${s}" th:text="${s}" th:selected="${status == s}">Status</option>
                 </select>
             </div>

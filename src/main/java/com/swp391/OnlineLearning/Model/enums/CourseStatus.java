@@ -1,4 +1,4 @@
-package com.example.demo.model.enums;
+package com.swp391.OnlineLearning.model.enums;
 
 public enum CourseStatus {
     PENDING("Chờ duyệt"),
