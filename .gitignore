@@ -24,14 +24,16 @@ buildNumber.properties
 .sts4-cache
 ### VS Code ###
 .vscode/
+.cursor/
 ### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
 
-.agent/
-.agents/
-.cursor/
-diagram/
+*.drawio
+test.txt
+HELP.md
 openspec/
+.agents/
+.agent/
