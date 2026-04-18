@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -107,8 +108,9 @@ public class AdminController {
     }
 
     @PostMapping("/users/delete/{id}")
-    public String deleteUser(@PathVariable Long id) {
+    public String deleteUser(@PathVariable Long id, RedirectAttributes ra) {
         userService.deleteById(id);
+        ra.addFlashAttribute("success", "Xóa người dùng thành công!");
         return "redirect:/admin/users";
     }
 
@@ -180,8 +182,9 @@ public class AdminController {
     }
 
     @PostMapping("/course_categories/delete/{id}")
-    public String deleteCategory(@PathVariable Long id) {
+    public String deleteCategory(@PathVariable Long id, RedirectAttributes ra) {
         courseCategoryService.deleteCategory(id);
+        ra.addFlashAttribute("success", "Xóa danh mục thành công!");
         return "redirect:/admin/course_categories";
     }
 
@@ -247,8 +250,9 @@ public class AdminController {
     }
 
     @PostMapping("/sliders/delete/{id}")
-    public String deleteSlider(@PathVariable Long id) {
+    public String deleteSlider(@PathVariable Long id, RedirectAttributes ra) {
         sliderService.deleteSlider(id);
+        ra.addFlashAttribute("success", "Xóa slider thành công!");
         return "redirect:/admin/sliders";
     }
 
