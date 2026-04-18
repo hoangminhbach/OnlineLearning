@@ -1,7 +1,7 @@
-package com.swp391.OnlineLearning.service;
+package com.swp391.OnlineLearning.Service;
 
 import com.swp391.OnlineLearning.Model.CourseCategory;
-import com.swp391.OnlineLearning.repository.CourseCategoryRepository;
+import com.swp391.OnlineLearning.Repository.CourseCategoryRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,7 +1,7 @@
-package com.swp391.OnlineLearning.service;
+package com.swp391.OnlineLearning.Service;
 
 import com.swp391.OnlineLearning.Model.Course;
-import com.swp391.OnlineLearning.repository.CourseRepository;
+import com.swp391.OnlineLearning.Repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
