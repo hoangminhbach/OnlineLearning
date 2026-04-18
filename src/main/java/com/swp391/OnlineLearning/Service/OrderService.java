@@ -1,8 +1,8 @@
-package com.swp391.OnlineLearning.service;
+package com.swp391.OnlineLearning.Service;
 
 import com.swp391.OnlineLearning.Model.Order;
 import com.swp391.OnlineLearning.Model.enums.OrderStatus;
-import com.swp391.OnlineLearning.repository.OrderRepository;
+import com.swp391.OnlineLearning.Repository.OrderRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

@@ -1,8 +1,8 @@
-package com.swp391.OnlineLearning.service;
+package com.swp391.OnlineLearning.Service;
 
 import com.swp391.OnlineLearning.Model.Slider;
 import com.swp391.OnlineLearning.Model.enums.SliderStatus;
-import com.swp391.OnlineLearning.repository.SliderRepository;
+import com.swp391.OnlineLearning.Repository.SliderRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
