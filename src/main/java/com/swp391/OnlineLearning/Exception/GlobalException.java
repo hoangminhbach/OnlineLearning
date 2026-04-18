@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-
 @RestControllerAdvice
 public class GlobalException {
     @ExceptionHandler(NoSuchElementException.class)
@@ -69,4 +68,3 @@ public class GlobalException {
         return modelAndView;
     }
 }
-
