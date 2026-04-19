@@ -38,6 +38,25 @@ public class BlogController {
             Page<BlogDTO> blogPage = this.blogService.getPaginatedPublishedBlogsByCategorySlug(categorySlug, pageable);
             List<BlogCategory> blogCategories = this.blogCategoryService.findAll();
 
+            if (categorySlug != null && !categorySlug.isEmpty()) {
+                blogCategories.stream()
+                        .filter(c -> categorySlug.equals(c.getSlug()))
+                        .findFirst()
+                        .ifPresent(c -> model.addAttribute("activeCategory", c));
+            }
+
+            List<BlogDTO> content = blogPage.getContent();
+            if (page == 1 && !content.isEmpty()) {
+                model.addAttribute("featuredBlog", content.get(0));
+                if (content.size() > 1) {
+                    model.addAttribute("regularBlogs", content.subList(1, content.size()));
+                } else {
+                    model.addAttribute("regularBlogs", List.of());
+                }
+            } else {
+                model.addAttribute("regularBlogs", content);
+            }
+
             model.addAttribute("blogPage", blogPage);
             model.addAttribute("currentPage", page);
             model.addAttribute("blogCategories", blogCategories);

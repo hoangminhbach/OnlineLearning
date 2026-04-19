@@ -3,148 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách Bài Viết</title>
+    <title th:text="${activeCategory != null ? activeCategory.name + ' - Bài Viết' : 'Danh Sách Bài Viết'}">Danh Sách Bài Viết</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* (Toàn bộ CSS custom của bạn ở đây) */
         :root {
-            --primary-color: #6c63ff; --primary-hover: #5a54d6; --secondary-color: #4ecdc4;
-            --text-color: #333; --text-light: #666; --bg-color: #fff; --bg-light: #f8f9fa;
-            --border-color: #e9ecef; --shadow: 0 4px 20px rgba(0,0,0,0.08); --radius: 12px;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary: #0ea5e9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --bg-body: #ffffff;
+            --bg-surface: #f8fafc;
+            --border: #e2e8f0;
+            --radius-md: 12px;
+            --radius-lg: 24px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.05);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: var(--text-color); background-color: var(--bg-light); }
-        .container-fluid { padding: 0; }
-        .content-container { max-width: 1400px; margin: 2rem auto; padding: 0 15px; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
-        .page-title { font-size: 2.5rem; font-weight: 700; color: var(--text-color); }
-        .btn { padding: 0.6rem 1.2rem; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s ease; white-space: nowrap; }
-        .btn-primary { background: var(--primary-color); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); }
 
-        /* Layout */
-        .main-layout { display: grid; grid-template-columns: 1fr; gap: 2.5rem; }
-        @media (min-width: 992px) { .main-layout { grid-template-columns: 1fr 320px; } }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); line-height: 1.6; }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+        
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; transition: all 0.2s; cursor: pointer; border: none; font-size: 0.95rem; }
+        .btn-outline { border: 1px solid var(--border); color: var(--text-main); background: transparent; }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--bg-surface); }
 
-        /* Sidebar */
-        .sidebar { background: var(--bg-color); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); height: fit-content; position: sticky; top: 20px; display: flex; flex-direction: column; gap: 1.5rem; }
-        .sidebar-section { border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; }
-        .sidebar-section:last-child { border-bottom: none; padding-bottom: 0; }
-        .sidebar-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-color); }
-        .search-box { position: relative; }
-        .search-box input { padding-right: 2.5rem; border-radius: 8px; border: 1px solid var(--border-color); }
-        .search-box button { position: absolute; right: 0; top: 0; bottom: 0; border: none; background: transparent; color: var(--text-light); padding: 0 0.8rem; cursor: pointer; }
-        .category-list { list-style: none; padding: 0; }
-        .category-item a { display: block; padding: 0.5rem 0; color: var(--text-light); text-decoration: none; transition: color 0.3s ease; }
-        .category-item a:hover { color: var(--primary-color); }
-        .featured-course { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; text-decoration: none; color: inherit; }
-        .featured-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; flex-shrink: 0;}
-        .featured-title { font-size: 0.9rem; font-weight: 500; }
-        .contact-info { list-style: none; padding: 0; }
-        .contact-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.4rem 0; color: var(--text-light); font-size: 0.9rem; }
-        .contact-item i { width: 16px; color: var(--primary-color); text-align: center; }
+        /* Typography */
+        h1, h2, h3, h4 { color: var(--text-main); line-height: 1.2; letter-spacing: -0.02em; }
+        
+        /* Blog Hero / Intro */
+        .blog-hero { padding: 5rem 0 3rem; background-color: var(--bg-surface); border-bottom: 1px solid var(--border); text-align: center; }
+        .blog-hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; }
+        .blog-hero p { font-size: 1.15rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+
+        /* Category Chips Navigation */
+        .category-nav { padding: 2rem 0; border-bottom: 1px solid var(--border); background: white; position: sticky; top: 76px; z-index: 10; box-shadow: var(--shadow-sm); }
+        .chip-list { display: flex; gap: 0.75rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 0.5rem; }
+        .chip-list::-webkit-scrollbar { display: none; }
+        .chip { display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: var(--bg-surface); color: var(--text-muted); border: 1px solid var(--border); border-radius: 100px; font-weight: 500; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap; }
+        .chip:hover { border-color: var(--text-muted); color: var(--text-main); }
+        .chip.active { background: var(--text-main); color: white; border-color: var(--text-main); }
+
+        /* Main Stream Section */
+        .main-stream { padding: 4rem 0 6rem; min-height: 50vh; }
+
+        /* Featured Article */
+        .featured-article { margin-bottom: 4rem; }
+        .featured-card { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; background: white; border-radius: var(--radius-lg); overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; }
+        .featured-card:hover { transform: translateY(-4px); }
+        .featured-card:hover .featured-thumb img { transform: scale(1.03); }
+        .featured-card:hover .featured-title { color: var(--primary); }
+        .featured-thumb { width: 100%; height: 400px; overflow: hidden; border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
+        .featured-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        
+        .featured-content { display: flex; flex-direction: column; justify-content: center; }
+        .badge { display: table; padding: 0.4rem 0.8rem; background: #dbeafe; color: var(--primary); border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem; }
+        .featured-title { font-size: 2.25rem; font-weight: 800; margin-bottom: 1rem; transition: color 0.2s; }
+        .featured-desc { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* Shared Meta */
+        .meta { display: flex; align-items: center; gap: 1rem; border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: auto; }
+        .meta .author { display: flex; align-items: center; gap: 0.75rem; font-weight: 600; font-size: 0.95rem; color: var(--text-main); }
+        .meta .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .meta .date { font-size: 0.9rem; color: var(--text-light); }
+        .meta .dot { width: 4px; height: 4px; background: var(--text-light); border-radius: 50%; }
+
+        /* Article Grid */
+        .article-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2.5rem; }
+        .article-card { display: flex; flex-direction: column; transition: transform 0.2s; }
+        .article-card:hover { transform: translateY(-4px); }
+        .article-card:hover .article-title { color: var(--primary); }
+        .article-card:hover .article-thumb img { transform: scale(1.05); }
+        .article-thumb { width: 100%; height: 220px; overflow: hidden; border-radius: var(--radius-md); margin-bottom: 1.5rem; }
+        .article-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .article-title { font-size: 1.35rem; font-weight: 700; margin-bottom: 0.75rem; margin-top: 0.75rem; transition: color 0.2s; }
+        .article-desc { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+        
+        .article-card .meta { border-top: none; padding-top: 0; margin-top: auto; }
+        .article-card .meta .author-name { font-weight: 500; font-size: 0.9rem; color: var(--text-main); }
+        .article-card .meta .date { font-size: 0.85rem; }
+
+        /* Section Header for recent posts */
+        .section-header { font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+
+        /* Empty State */
+        .empty-state { text-align: center; padding: 4rem 2rem; background: white; border-radius: var(--radius-lg); border: 1px dashed var(--border); }
+        .empty-state i { font-size: 3rem; color: var(--text-light); margin-bottom: 1.5rem; }
+        .empty-state h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .empty-state p { color: var(--text-muted); margin-bottom: 2rem; }
 
         /* Pagination */
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 3rem; flex-wrap: wrap; padding: 0; list-style: none;}
-        .pagination .page-item .page-link { padding: 0.6rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; text-decoration: none; color: var(--text-color); transition: all 0.3s ease; font-weight: 500; background-color: var(--bg-color); }
-        .pagination .page-item .page-link:hover { border-color: var(--primary-color); color: var(--primary-color); background-color: #f0f2ff; }
-        .pagination .page-item.active .page-link { background: var(--primary-color); color: white; border-color: var(--primary-color); z-index: 3; }
-        .pagination .page-item.disabled .page-link { color: #adb5bd; background-color: var(--bg-light); border-color: var(--border-color); cursor: default; pointer-events: none; }
+        .pagination-container { display: flex; justify-content: center; margin-top: 5rem; }
+        .pagination { display: flex; gap: 0.5rem; list-style: none; }
+        .page-link { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; padding: 0 0.5rem; border-radius: 8px; font-weight: 500; color: var(--text-muted); background: white; border: 1px solid var(--border); transition: all 0.2s; cursor: pointer; }
+        .page-link:hover { border-color: var(--primary); color: var(--primary); }
+        .page-item.active .page-link { background: var(--text-main); color: white; border-color: var(--text-main); }
+        .page-item.disabled .page-link { opacity: 0.5; pointer-events: none; background: var(--bg-surface); }
+        .page-item.prev-next .page-link { padding: 0 1rem; }
 
-        /* Card Styles */
-        .card-custom {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-bottom: 1.5rem; /* Thêm khoảng cách giữa các card */
-            overflow: hidden; /* Đảm bảo ảnh bo góc đúng */
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .featured-card { grid-template-columns: 1fr; gap: 1.5rem; }
+            .featured-thumb { height: 300px; }
         }
-        .badge-custom {
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-        .author-name {
-            font-weight: 600;
-        }
-        .card-title-custom {
-            font-weight: 700;
-            font-size: 1.75rem;
-        }
-        .thumbnail-img {
-            border-radius: 10px;
-            object-fit: cover;
-            height: 100%;
-            max-height: 180px;
-        }
-
-        /* Thêm style cho thẻ <a> bọc card */
-        .blog-link {
-            text-decoration: none;
-            color: inherit; /* Kế thừa màu chữ (đen) */
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: block; /* Quan trọng */
-        }
-        .blog-link:hover .card-custom {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-        .blog-link:hover .card-title-custom {
-            color: var(--primary-color); /* Đổi màu tiêu đề khi hover */
+        @media (max-width: 768px) {
+            .blog-hero { padding: 3rem 0; }
+            .blog-hero h1 { font-size: 2.25rem; }
+            .blog-hero p { font-size: 1rem; }
+            .featured-thumb { height: 240px; }
+            .featured-title { font-size: 1.75rem; }
+            .article-grid { grid-template-columns: 1fr; }
         }
     </style>
+    <!-- Header/Footer CSS Fallbacks -->
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/footer.css}">
 </head>
 <body>
 
+<!-- Header -->
 <div th:replace="~{components/header :: header}"></div>
 
-<div class="content-container">
-    <div class="page-header">
-        <h1 class="page-title">Danh sách Bài Viết</h1>
+<!-- Editorial Hero/Intro -->
+<section class="blog-hero">
+    <div class="container">
+        <h1 th:text="${activeCategory != null ? activeCategory.name : 'Khám phá Tri Thức'}">Khám phá Tri Thức</h1>
+        <p th:if="${activeCategory == null}">
+            Cập nhật những chiến lược học tập tiếng Anh hiệu quả, kinh nghiệm luyện thi IELTS và kiến thức giao tiếp từ chuyên gia OELS.
+        </p>
+        <p th:if="${activeCategory != null}" th:text="${'Khám phá các bài viết hay nhất về chủ đề ' + activeCategory.name.toLowerCase() + '.'}">
+            Các bài viết hay nhất về chủ đề này.
+        </p>
     </div>
+</section>
 
-    <div class="main-layout">
-        <div class="main-content">
-            <a th:each="blogDTO : ${blogPage.content}"
-               th:href="'/blogs/' + ${blogDTO.id}"
-               class="blog-link">
+<!-- Category Chips Navigation -->
+<section class="category-nav">
+    <div class="container">
+        <div class="chip-list">
+            <a th:href="@{/blogs}" class="chip" th:classappend="${categorySlug == null || categorySlug.isEmpty() ? 'active' : ''}">Tất cả</a>
+            <a th:each="c : ${blogCategories}" 
+               th:href="@{/blogs(categorySlug=${c.slug})}" 
+               class="chip" 
+               th:classappend="${categorySlug == c.slug ? 'active' : ''}"
+               th:text="${c.name}">Category</a>
+        </div>
+    </div>
+</section>
 
-                <div class="card card-custom">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <img th:src="@{'/uploads/' + ${blogDTO.authorAvatarUrl}}" class="rounded-circle" alt="Avatar" width="40" height="40">
-                            <span class="ms-2 author-name" th:text="${blogDTO.authorName}">Vân Phương Nguyễn</span>
-                        </div>
+<!-- Main Results -->
+<section class="main-stream">
+    <div class="container">
 
-                        <div class="row align-items-center">
-                            <div class="col-md-9">
-                                <h2 class="card-title-custom mb-3" th:text="${blogDTO.title}">
-                                    title
-                                </h2>
-                                <p class="text-muted mb-3" th:text="${blogDTO.shortDescription}">
-                                    Short description goes here...
-                                </p>
-                                <div class="d-flex align-items-center flex-wrap">
-                                    <span class="badge rounded-pill bg-light text-dark border badge-custom me-3 px-3 py-2" th:text="${blogDTO.categoryName}">Tự học</span>
-                                    <small class="text-muted" th:text="${#temporals.format(blogDTO.createdAt, 'dd-MM-yyyy')}"></small>
-                                </div>
+        <!-- Empty state -->
+        <div th:if="${blogPage == null || blogPage.isEmpty()}" class="empty-state">
+            <i class="fas fa-search"></i>
+            <h3>Không tìm thấy bài viết nào</h3>
+            <p>Chúng tôi chưa xuất bản bài viết nào thuộc chủ đề này. Hãy thử chọn chủ đề khác.</p>
+            <a th:href="@{/blogs}" class="btn btn-outline">Xem tất cả bài viết</a>
+        </div>
+
+        <!-- Content available -->
+        <div th:if="${blogPage != null && !blogPage.isEmpty()}">
+
+            <!-- Featured Article (Only on page 1) -->
+            <div th:if="${featuredBlog != null}" class="featured-article">
+                <a th:href="@{'/blogs/' + ${featuredBlog.id}}" class="featured-card">
+                    <div class="featured-thumb">
+                        <img th:src="${featuredBlog.thumbnail != null and featuredBlog.thumbnail.startsWith('http') ? featuredBlog.thumbnail : '/uploads/' + featuredBlog.thumbnail}" alt="Featured Article Thumbnail">
+                    </div>
+                    <div class="featured-content">
+                        <span class="badge" th:text="${featuredBlog.categoryName}">Danh mục</span>
+                        <h2 class="featured-title" th:text="${featuredBlog.title}">Tiêu đề bài viết nổi bật</h2>
+                        <p class="featured-desc" th:text="${featuredBlog.shortDescription}">Đoạn mô tả ngắn gọn về bài viết để thu hút người đọc nhấp vào xem thêm chi tiết nội dung...</p>
+                        <div class="meta">
+                            <div class="author">
+                                <img th:if="${featuredBlog.authorAvatarUrl != null}" th:src="@{'/uploads/' + ${featuredBlog.authorAvatarUrl}}" class="avatar" alt="Avatar">
+                                <span th:text="${featuredBlog.authorName}">Tên Tác Giả</span>
                             </div>
-
-                            <div class="col-md-3 mt-3 mt-md-0">
-                                <img th:src="'/uploads/' + ${blogDTO.thumbnail}" class="img-fluid thumbnail-img w-100" alt="Blog Thumbnail">
-                            </div>
+                            <span class="dot"></span>
+                            <span class="date" th:text="${#temporals.format(featuredBlog.createdAt, 'dd-MM-yyyy')}">01/01/2026</span>
                         </div>
                     </div>
-                </div>
-            </a>
-            <div th:if="${blogPage == null || blogPage.isEmpty()}" class="alert alert-info mt-4 text-center">
-                Không tìm thấy bài viết nào phù hợp.
+                </a>
             </div>
 
-            <nav aria-label="Page navigation" th:if="${blogPage.totalPages > 1}" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item" th:classappend="${blogPage.first} ? 'disabled'">
-                        <a class="page-link" th:href="${blogPage.first} ? '#' : @{/blogs(page=${currentPage - 1}, categorySlug=${categorySlug})}">Trước</a>
+            <!-- Article Stream -->
+            <div th:if="${regularBlogs != null && !regularBlogs.isEmpty()}" class="article-stream">
+                <h3 th:if="${featuredBlog != null}" class="section-header">Bài viết mới nhất</h3>
+                <div class="article-grid">
+                    <a th:each="blog : ${regularBlogs}" th:href="@{'/blogs/' + ${blog.id}}" class="article-card">
+                        <div class="article-thumb">
+                            <img th:src="${blog.thumbnail != null and blog.thumbnail.startsWith('http') ? blog.thumbnail : '/uploads/' + blog.thumbnail}" alt="Blog Thumbnail">
+                        </div>
+                        <span class="badge" th:text="${blog.categoryName}">Danh mục</span>
+                        <h3 class="article-title" th:text="${blog.title}">Tiêu đề bài viết thường</h3>
+                        <p class="article-desc" th:text="${blog.shortDescription}">Mô tả bài viết thường, không quá dài chỉ vừa đủ để cung cấp tóm tắt thông tin quan trọng...</p>
+                        <div class="meta">
+                            <span class="author-name" th:text="${blog.authorName}">Tên Tác Giả</span>
+                            <span class="dot"></span>
+                            <span class="date" th:text="${#temporals.format(blog.createdAt, 'dd-MM-yyyy')}">01/01/2026</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${blogPage.totalPages > 1}" aria-label="Page navigation" class="pagination-container">
+                <ul class="pagination">
+                    <li class="page-item prev-next" th:classappend="${blogPage.first} ? 'disabled'">
+                        <a class="page-link" th:href="${blogPage.first} ? '#' : @{/blogs(page=${currentPage - 1}, categorySlug=${categorySlug})}">
+                            <i class="fas fa-chevron-left ps-1 pe-2"></i> Trước
+                        </a>
                     </li>
 
                     <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, blogPage.totalPages - 1)}"
@@ -153,39 +229,20 @@
                            th:text="${pageNumber + 1}">1</a>
                     </li>
 
-                    <li class="page-item" th:classappend="${blogPage.last} ? 'disabled'">
-                        <a class="page-link" th:href="${blogPage.last} ? '#' : @{/blogs(page=${currentPage + 1}, categorySlug=${categorySlug})}">Sau</a>
+                    <li class="page-item prev-next" th:classappend="${blogPage.last} ? 'disabled'">
+                        <a class="page-link" th:href="${blogPage.last} ? '#' : @{/blogs(page=${currentPage + 1}, categorySlug=${categorySlug})}">
+                            Sau <i class="fas fa-chevron-right ps-2 pe-1"></i>
+                        </a>
                     </li>
                 </ul>
             </nav>
 
         </div>
-        <aside class="sidebar">
-        <div class="sidebar-section">
-            <h3 class="sidebar-title">Chủ đề</h3>
-            <ul class="category-list">
-                <li class="category-item">
-                    <a href="/blogs">Tất cả </a>
-                </li>
-                <li class="category-item" th:each="blogCate : ${blogCategories}">
-                    <a th:href="@{/blogs(categorySlug=${blogCate.slug})}" th:text="${blogCate.name}">Category Name</a>
-                </li>
-            </ul>
-        </div>
-
-        <div class="sidebar-section">
-            <h3 class="sidebar-title">Thông tin liên hệ</h3>
-            <ul class="contact-info">
-                <li class="contact-item"><i class="fas fa-envelope"></i><span>contact@oels.edu.vn</span></li>
-                <li class="contact-item"><i class="fas fa-phone"></i><span>+84 123 456 789</span></li>
-                <li class="contact-item"><i class="fas fa-map-marker-alt"></i><span>Hà Nội, Việt Nam</span></li>
-            </ul>
-        </div>
-    </aside>
     </div>
-</div>
+</section>
+
+<!-- Footer -->
 <div th:replace="~{components/footer :: footer}"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
