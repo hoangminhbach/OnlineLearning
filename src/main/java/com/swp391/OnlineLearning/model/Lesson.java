@@ -1,21 +1,21 @@
 package com.swp391.OnlineLearning.model;
+import lombok.Getter;
+import lombok.Setter;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
 @Entity
 @Table(name = "lessons")
+@Getter
+@Setter
 public class Lesson extends BaseEntity{
     public enum LessonType {
-        LECTURE("BÃ i giáº£ng"),
-        QUIZ("BÃ i kiá»ƒm tra");
+        LECTURE("Bài giảng"),
+        QUIZ("Bài kiểm tra");
 
         private final String displayName;
         LessonType(String displayName) {
@@ -30,42 +30,42 @@ public class Lesson extends BaseEntity{
     private Long id;
 
     @Column(nullable = false, length = 200, columnDefinition = "NVARCHAR(200)")
-    @NotBlank(message = "TiÃªu Ä‘á» bÃ i há»c khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.")
-    @Size(min = 5, max = 200, message = "TiÃªu Ä‘á» bÃ i há»c pháº£i cÃ³ Ä‘á»™ dÃ i tá»« 5 Ä‘áº¿n 200 kÃ½ tá»±.")
+    @NotBlank(message = "Tiêu đề bài học không được để trống.")
+    @Size(min = 5, max = 200, message = "Tiêu đề bài học phải có độ dài từ 5 đến 200 ký tự.")
     private String title;
 
     @Column(nullable = false)
-    @NotNull(message = "Thá»© tá»± bÃ i há»c khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.")
-    @PositiveOrZero(message = "Thá»© tá»± bÃ i há»c pháº£i lÃ  sá»‘ khÃ´ng Ã¢m.")
+    @NotNull(message = "Thứ tự bài học không được để trống.")
+    @PositiveOrZero(message = "Thứ tự bài học phải là số không âm.")
     private Integer orderNumber;
 
     @Column(nullable = false)
-    @NotNull(message = "Loáº¡i bÃ i há»c khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.")
+    @NotNull(message = "Loại bài học không được để trống.")
     @Enumerated(EnumType.STRING)
     private LessonType lessonType;
 
-    @Positive(message = "Thá»i lÆ°á»£ng Æ°á»›c tÃ­nh cá»§a bÃ i há»c pháº£i lÃ  sá»‘ dÆ°Æ¡ng.")
+    @Positive(message = "Thời lượng ước tính của bài học phải là số dương.")
     private Integer estimatedTime;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String htmlContent;
 
-    // --- DÃ nh cho bÃ i giáº£ng ---
+    // --- Dành cho bài giảng ---
     private String videoUrl;
-    private Long duration = 0L; // tÃ­nh báº±ng milliseconds
+    private Long duration = 0L; // tính bằng milliseconds
 
-    // --- DÃ nh cho bÃ i kiá»ƒm tra ---
+    // --- Dành cho bài kiểm tra ---
     @Column(name = "pass_rate")
-    @Min(value = 0, message = "Äiá»ƒm Ä‘áº¡t yÃªu cáº§u pháº£i lá»›n hÆ¡n hoáº·c báº±ng 0.")
-    @Max(value = 100, message = "Äiá»ƒm Ä‘áº¡t yÃªu cáº§u pháº£i nhá» hÆ¡n hoáº·c báº±ng 100.")
+    @Min(value = 0, message = "Điểm đạt yêu cầu phải lớn hơn hoặc bằng 0.")
+    @Max(value = 100, message = "Điểm đạt yêu cầu phải nhỏ hơn hoặc bằng 100.")
     private Integer passRate;
 
-    @Positive(message = "Giá»›i háº¡n thá»i gian pháº£i lÃ  sá»‘ dÆ°Æ¡ng.")
+    @Positive(message = "Giới hạn thời gian phải là số dương.")
     private Integer timeLimitInMinutes;
 
     @Column(name = "number_of_questions")
-    @Min(value = 1, message = "Sá»‘ lÆ°á»£ng cÃ¢u há»i pháº£i lá»›n hÆ¡n hoáº·c báº±ng 1.")
-    @Max(value = 100, message = "Sá»‘ lÆ°á»£ng cÃ¢u há»i pháº£i nhá» hÆ¡n hoáº·c báº±ng 100.")
+    @Min(value = 1, message = "Số lượng câu hỏi phải lớn hơn hoặc bằng 1.")
+    @Max(value = 100, message = "Số lượng câu hỏi phải nhỏ hơn hoặc bằng 100.")
     private Integer numberOfQuestions;
 
     @OneToMany(mappedBy = "lesson", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -74,6 +74,10 @@ public class Lesson extends BaseEntity{
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "chapter_id")
     private Chapter chapter;
+
+    public Lesson() {
+        super();
+    }
 
     public Lesson(String title, Integer orderNumber, LessonType lessonType, Integer estimatedTime, Integer passRate, Integer timeLimitInMinutes, Integer numberOfQuestions) {
         this.title = title;
@@ -96,4 +100,108 @@ public class Lesson extends BaseEntity{
         this.chapter = chapter;
     }
 
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Integer getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(Integer orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    public LessonType getLessonType() {
+        return lessonType;
+    }
+
+    public void setLessonType(LessonType lessonType) {
+        this.lessonType = lessonType;
+    }
+
+    public Integer getEstimatedTime() {
+        return estimatedTime;
+    }
+
+    public void setEstimatedTime(Integer estimatedTime) {
+        this.estimatedTime = estimatedTime;
+    }
+
+    public Integer getPassRate() {
+        return passRate;
+    }
+
+    public void setPassRate(Integer passRate) {
+        this.passRate = passRate;
+    }
+
+    public Integer getTimeLimitInMinutes() {
+        return timeLimitInMinutes;
+    }
+
+    public void setTimeLimitInMinutes(Integer timeLimitInMinutes) {
+        this.timeLimitInMinutes = timeLimitInMinutes;
+    }
+
+    public List<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<Question> questions) {
+        this.questions = questions;
+    }
+
+    public Chapter getChapter() {
+        return chapter;
+    }
+
+    public void setChapter(Chapter chapter) {
+        this.chapter = chapter;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    public String getHtmlContent() {
+        return htmlContent;
+    }
+
+    public void setHtmlContent(String htmlContent) {
+        this.htmlContent = htmlContent;
+    }
+
+    public Integer getNumberOfQuestions() {
+        return numberOfQuestions;
+    }
+
+    public void setNumberOfQuestions(Integer numberOfQuestions) {
+        this.numberOfQuestions = numberOfQuestions;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
 }

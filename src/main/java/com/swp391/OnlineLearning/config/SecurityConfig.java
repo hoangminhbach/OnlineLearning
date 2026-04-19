@@ -1,4 +1,4 @@
-package com.swp391.OnlineLearning.Config;
+package com.swp391.OnlineLearning.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,16 +13,16 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private final CustomUserDetailsService userService;
 
-    @Bean
-    public AuthenticationSuccessHandler myAuthenticationSuccessHandler() {
-        return new MySimpleUrlAuthenticationSuccessHandler();
+    private final AuthenticationSuccessHandler myAuthenticationSuccessHandler;
+
+    public SecurityConfig(CustomUserDetailsService userService, AuthenticationSuccessHandler myAuthenticationSuccessHandler) {
+        this.userService = userService;
+        this.myAuthenticationSuccessHandler = myAuthenticationSuccessHandler;
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -93,7 +93,7 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .loginProcessingUrl("/login")   // chỗ này phải đúng action form
                         .defaultSuccessUrl("/", true)
-                        .successHandler(myAuthenticationSuccessHandler())// true = luôn luôn redirect về /home
+                        .successHandler(myAuthenticationSuccessHandler)// true = luôn luôn redirect về /home
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
@@ -102,4 +102,9 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // Optional: Tắt authentication manager
+    // @Bean
+    // public AuthenticationManager authenticationManager() {
+    //     return authentication -> { throw new RuntimeException("Authentication disabled"); };
+    // }
 }

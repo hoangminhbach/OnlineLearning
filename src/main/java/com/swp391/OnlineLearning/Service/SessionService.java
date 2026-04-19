@@ -23,16 +23,14 @@ public class SessionService {
         HttpSession session = request.getSession();
         String email = authentication.getName();
 
-        // Kiá»ƒm tra xem user Ä‘Ã£ cÃ³ trong session chÆ°a
+        // Kiểm tra xem user đã có trong session chưa
         User currentUser = (User) session.getAttribute("currentUser");
         if (currentUser == null || !currentUser.getEmail().equals(email)) {
-            // Load user tá»« database vÃ  lÆ°u vÃ o session
-            User user = userService.findByEmail(email);
-            if (user != null) {
-                session.setAttribute("currentUserId", user.getId());
-                System.out.println("âœ… User stored in session: " + user.getEmail() +
-                        " (Auth type: " + getAuthenticationType(authentication) + ")");
-            }
+            // Load user từ database và lưu vào session
+            User user = userService.findByEmailAndEnabledTrue(email).orElseThrow();
+            session.setAttribute("currentUserId", user.getId());
+            System.out.println("✅ User stored in session: " + user.getEmail() +
+                    " (Auth type: " + getAuthenticationType(authentication) + ")");
         }
     }
 

@@ -1,81 +1,20 @@
 package com.swp391.OnlineLearning.service;
 
 import com.swp391.OnlineLearning.model.CourseCategory;
-import com.swp391.OnlineLearning.repository.CourseCategoryRepository;
-import org.springframework.dao.DataIntegrityViolationException;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
-public class CourseCategoryService {
-    private final CourseCategoryRepository repository;
+public interface CourseCategoryService {
+    List<CourseCategory> findAll();
 
-    public CourseCategoryService(CourseCategoryRepository repository) {
-        this.repository = repository;
-    }
+    void ensureNotDuplicateName(String name);
 
-    public Page<CourseCategory> findAll(Pageable pageable) {
-        return repository.findAll(pageable);
-    }
+    void save(@Valid CourseCategory courseCategory);
 
-    public List<CourseCategory> findAll() {
-        return repository.findAll();
-    }
+    CourseCategory getById(Long id);
 
-    public Page<CourseCategory> findWithFilters(String keyword, Boolean active, Pageable pageable) {
-        return repository.findWithFilters(keyword, active, pageable);
-    }
-
-    public CourseCategory findById(Long id) {
-        return repository.findById(id).orElse(null);
-    }
-
-    public CourseCategory save(CourseCategory category) {
-        return repository.save(category);
-    }
-
-    public CourseCategory createCategory(CourseCategory category) {
-        if (repository.existsByName(category.getName())) {
-            throw new IllegalArgumentException("TÃªn danh má»¥c Ä‘Ã£ tá»“n táº¡i!");
-        }
-        return repository.save(category);
-    }
-
-    public CourseCategory updateCategory(Long id, CourseCategory categoryDetails) {
-        CourseCategory category = findById(id);
-        if (category == null) {
-            throw new IllegalArgumentException("Category not found");
-        }
-        category.setName(categoryDetails.getName());
-        category.setDescription(categoryDetails.getDescription());
-        category.setActive(categoryDetails.isActive());
-        return repository.save(category);
-    }
-
-    public void deleteCategory(Long id) {
-        try {
-            repository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalStateException("KhÃ´ng thá»ƒ xÃ³a danh má»¥c nÃ y vÃ¬ Ä‘ang cÃ³ khÃ³a há»c thuá»™c danh má»¥c.");
-        }
-    }
-
-    public CourseCategory update(CourseCategory category) {
-        return repository.save(category);
-    }
-
-    public void deleteById(Long id) {
-        repository.deleteById(id);
-    }
-
-    public long count() {
-        return repository.count();
-    }
-
-    public long countCategories() {
-        return repository.count();
-    }
+    Page<CourseCategory> getCourseCategoriesWithSpecs(Pageable pageable, Boolean active, String search);
 }
