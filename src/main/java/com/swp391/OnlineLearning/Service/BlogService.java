@@ -11,6 +11,7 @@ public interface BlogService {
     Page<BlogDTO> getPaginatedPublishedBlogsByCategorySlug(String blogCategorySlug, Pageable pageable);
 
     BlogDTO getBlogById(Long blogId);
-
+    BlogDTO getBlogByIdForMarketing(Long blogId);
     List<BlogDTO> findLatestBlogs(int quantity);
+    Page<BlogDTO> getBlogsForMarketing(String keyword, String statusStr, int page, int size);
 }

@@ -24,7 +24,8 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
             b.updatedAt,
             b.thumbnail,
             bc.name,
-            bc.slug
+            bc.slug,
+            b.status
         ) from Blog b
         join b.blogCategory bc
         join b.author a
@@ -44,7 +45,8 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
             b.updatedAt,
             b.thumbnail,
             bc.name,
-            bc.slug
+            bc.slug,
+            b.status
         ) from Blog b
         join b.blogCategory bc
         join b.author a
@@ -64,11 +66,55 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
             b.updatedAt,
             b.thumbnail,
             bc.name,
-            bc.slug
+            bc.slug,
+            b.status
         ) from Blog b
         join b.blogCategory bc
         join b.author a
         where b.status = 'PUBLISHED'
     """)
     List<BlogDTO> findLatestPublishedBlogs(Pageable pageable);
+
+    @Query("""
+        Select new com.swp391.OnlineLearning.model.dto.BlogDTO(
+            b.id,
+            a.avatar,
+            a.fullName,
+            b.title,
+            b.shortDescription,
+            b.content,
+            b.createdAt,
+            b.updatedAt,
+            b.thumbnail,
+            bc.name,
+            bc.slug,
+            b.status
+        ) from Blog b
+        join b.blogCategory bc
+        join b.author a
+        where b.id = :id
+""")
+    BlogDTO findBlogById(@Param("id") Long id);
+
+    @Query("""
+        Select new com.swp391.OnlineLearning.model.dto.BlogDTO(
+            b.id,
+            a.avatar,
+            a.fullName,
+            b.title,
+            b.shortDescription,
+            b.content,
+            b.createdAt,
+            b.updatedAt,
+            b.thumbnail,
+            bc.name,
+            bc.slug,
+            b.status
+        ) from Blog b
+        join b.blogCategory bc
+        join b.author a
+        where (:keyword is null or :keyword = '' or b.title like %:keyword% or b.shortDescription like %:keyword%)
+        and (:status is null or b.status = :status)
+    """)
+    Page<BlogDTO> findAllBlogsForMarketing(@Param("keyword") String keyword, @Param("status") Blog.BlogStatus status, Pageable pageable);
 }

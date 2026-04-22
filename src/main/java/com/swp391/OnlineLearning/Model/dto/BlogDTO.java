@@ -15,11 +15,12 @@ public class BlogDTO {
     private String thumbnail;
     private String categoryName;
     private String categorySlug;
+    private com.swp391.OnlineLearning.model.Blog.BlogStatus status;
 
     public BlogDTO() {
     }
 
-    public BlogDTO(Long id, String authorAvatarUrl, String authorName, String title, String shortDescription, String content, LocalDateTime createdDate, LocalDateTime updatedDate, String thumbnail, String categoryName, String categorySlug) {
+    public BlogDTO(Long id, String authorAvatarUrl, String authorName, String title, String shortDescription, String content, LocalDateTime createdDate, LocalDateTime updatedDate, String thumbnail, String categoryName, String categorySlug, com.swp391.OnlineLearning.model.Blog.BlogStatus status) {
         super();
         this.id = id;
         this.authorAvatarUrl = authorAvatarUrl;
@@ -32,6 +33,7 @@ public class BlogDTO {
         this.thumbnail = thumbnail;
         this.categoryName = categoryName;
         this.categorySlug = categorySlug;
+        this.status = status;
     }
 
     public Long getId() {
@@ -145,5 +147,13 @@ public class BlogDTO {
 
     public void setCategorySlug(String categorySlug) {
         this.categorySlug = categorySlug;
+    }
+
+    public com.swp391.OnlineLearning.model.Blog.BlogStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(com.swp391.OnlineLearning.model.Blog.BlogStatus status) {
+        this.status = status;
     }
 }
