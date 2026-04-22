@@ -24,6 +24,7 @@ buildNumber.properties
 .sts4-cache
 ### VS Code ###
 .vscode/
+.cursor/
 ### IntelliJ IDEA ###
 .idea
 *.iws
