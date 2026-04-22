@@ -1,11 +1,15 @@
-package com.swp391.OnlineLearning.Controller;
+package com.swp391.OnlineLearning.controller;
 
-import com.swp391.OnlineLearning.Model.CourseCategory;
-import com.swp391.OnlineLearning.Model.Order;
-import com.swp391.OnlineLearning.Model.User;
-import com.swp391.OnlineLearning.Model.UserRole;
-import com.swp391.OnlineLearning.Model.dto.OrderFilter;
-import com.swp391.OnlineLearning.Service.*;
+import com.swp391.OnlineLearning.model.Course;
+import com.swp391.OnlineLearning.model.CourseCategory;
+import com.swp391.OnlineLearning.model.Order;
+import com.swp391.OnlineLearning.model.User;
+import com.swp391.OnlineLearning.model.UserRole;
+import com.swp391.OnlineLearning.model.dto.OrderFilter;
+import com.swp391.OnlineLearning.repository.CourseRepository;
+import com.swp391.OnlineLearning.repository.EnrollmentRepository;
+import com.swp391.OnlineLearning.repository.OrderRepository;
+import com.swp391.OnlineLearning.service.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.management.relation.Role;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -35,33 +40,92 @@ public class AdminController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final CourseCategoryService courseCategoryService;
-    //private final OrderService orderService;
+    private final OrderService orderService;
+    private final CourseRepository courseRepository;
+    private final OrderRepository orderRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
-//    public AdminController(UserService userService, UploadService uploadService, RoleService roleService, PasswordEncoder passwordEncoder, EmailService emailService, CourseCategoryService courseCategoryService, OrderService orderService) {
-//        this.userService = userService;
-//        this.uploadService = uploadService;
-//        this.roleService = roleService;
-//        this.passwordEncoder = passwordEncoder;
-//        this.emailService = emailService;
-//        this.courseCategoryService = courseCategoryService;
-//        this.orderService = orderService;
-//    }
-
-
-    public AdminController(UserService userService, UploadService uploadService, RoleService roleService, PasswordEncoder passwordEncoder, EmailService emailService, CourseCategoryService courseCategoryService) {
+    public AdminController(UserService userService, UploadService uploadService, RoleService roleService, PasswordEncoder passwordEncoder, EmailService emailService, CourseCategoryService courseCategoryService, OrderService orderService, CourseRepository courseRepository, OrderRepository orderRepository, EnrollmentRepository enrollmentRepository) {
         this.userService = userService;
         this.uploadService = uploadService;
         this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.courseCategoryService = courseCategoryService;
+        this.orderService = orderService;
+        this.courseRepository = courseRepository;
+        this.orderRepository = orderRepository;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     //===================== DASHBOARD ========================
     @GetMapping("")
     public String admin(Model model) {
         List<User> users = userService.getAllUsers();
+        List<Order> orders = orderService.getAllOrders();
+        List<Course> courses = courseRepository.findAll();
+
+        // Counts
+        long totalUsers = users.size();
+        long totalCourses = courses.size();
+        long totalOrders = orders.size();
+
+        // Revenue
+        double totalRevenue = orders.stream()
+                .mapToDouble(Order::getAmount)
+                .sum();
+
+        // Monthly revenue (last 6 months)
+        Map<String, Double> monthlyRevenue = new LinkedHashMap<>();
+        java.time.LocalDate now = java.time.LocalDate.now();
+        for (int i = 5; i >= 0; i--) {
+            java.time.LocalDate month = now.minusMonths(i);
+            String monthKey = month.getMonth().toString().substring(0, 3);
+            double revenue = orders.stream()
+                    .filter(o -> o.getUpdatedAt() != null)
+                    .filter(o -> {
+                        java.time.LocalDate orderMonth = o.getUpdatedAt().toLocalDate();
+                        return orderMonth.getMonth() == month.getMonth() && orderMonth.getYear() == month.getYear();
+                    })
+                    .mapToDouble(Order::getAmount)
+                    .sum();
+            monthlyRevenue.put(monthKey, revenue);
+        }
+
+        // Popular courses (by enrollment count)
+        List<Map<String, Object>> popularCourses = new ArrayList<>();
+        for (Course course : courses) {
+            long enrollmentCount = enrollmentRepository.countByCourseId(course.getId());
+            Map<String, Object> courseData = new HashMap<>();
+            courseData.put("course", course);
+            courseData.put("enrollmentCount", enrollmentCount);
+            popularCourses.add(courseData);
+        }
+        popularCourses.sort((a, b) -> Long.compare((Long) b.get("enrollmentCount"), (Long) a.get("enrollmentCount")));
+        if (popularCourses.size() > 5) popularCourses = popularCourses.subList(0, 5);
+
+        // Recent orders (latest 5)
+        List<Order> recentOrders = orders.stream()
+                .sorted(Comparator.comparing(Order::getUpdatedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
+
+        // Recent courses (latest 5)
+        List<Course> recentCourses = courses.stream()
+                .sorted(Comparator.comparing(Course::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
+
         model.addAttribute("users", users);
+        model.addAttribute("totalUsers", totalUsers);
+        model.addAttribute("totalCourses", totalCourses);
+        model.addAttribute("totalOrders", totalOrders);
+        model.addAttribute("totalRevenue", new DecimalFormat("#,###").format(totalRevenue) + "Ä‘");
+        model.addAttribute("monthlyRevenue", monthlyRevenue);
+        model.addAttribute("popularCourses", popularCourses);
+        model.addAttribute("recentOrders", recentOrders);
+        model.addAttribute("recentCourses", recentCourses);
+
         return "admin/dashboard";
     }
 
@@ -77,7 +141,7 @@ public class AdminController {
                            @RequestParam(value = "sort", defaultValue = "id") String sort,
                            @RequestParam(value = "direction", defaultValue = "asc") String direction) {
 
-        // Tạo Sort object
+        // Táº¡o Sort object
         Sort sortObj = createSort(sort, direction);
         Pageable pageable = PageRequest.of(page, size, sortObj);
 
@@ -161,10 +225,10 @@ public class AdminController {
             userService.save(user);
 
             // Send email notification
-            emailService.sendEmail(user.getEmail(), "Tài khoản đã được tạo bởi Quản trị viên",
+            emailService.sendEmail(user.getEmail(), "TÃ i khoáº£n Ä‘Ã£ Ä‘Æ°á»£c táº¡o bá»Ÿi Quáº£n trá»‹ viÃªn",
                     emailService.buildEmailContent(plainPassword));
 
-            redirectAttributes.addFlashAttribute("successMessage", "Tạo người dùng thành công!");
+            redirectAttributes.addFlashAttribute("successMessage", "Táº¡o ngÆ°á»i dÃ¹ng thÃ nh cÃ´ng!");
             return "redirect:/admin/users";
 
         } catch (IllegalArgumentException e) {
@@ -173,7 +237,7 @@ public class AdminController {
             model.addAttribute("roles", roleService.findAll());
             return "admin/createUser";
         } catch (Exception e) {
-            bindingResult.rejectValue("email", "error.user", "Đã xảy ra lỗi khi tạo người dùng: " + e.getMessage());
+            bindingResult.rejectValue("email", "error.user", "ÄÃ£ xáº£y ra lá»—i khi táº¡o ngÆ°á»i dÃ¹ng: " + e.getMessage());
             model.addAttribute("genders", User.Gender.values());
             model.addAttribute("roles", roleService.findAll());
             return "admin/createUser";
@@ -208,10 +272,10 @@ public class AdminController {
             currentUser.setEnabled(user.isEnabled());
             this.userService.save(currentUser);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật người dùng thành công!");
+            redirectAttributes.addFlashAttribute("successMessage", "Cáº­p nháº­t ngÆ°á»i dÃ¹ng thÃ nh cÃ´ng!");
             return "redirect:/admin/users";
         }catch(Exception e){
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật người dùng: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Lá»—i khi cáº­p nháº­t ngÆ°á»i dÃ¹ng: " + e.getMessage());
             return "redirect:/admin/users";
         }
     }
@@ -220,10 +284,10 @@ public class AdminController {
     public String deleteUser(@PathVariable("id") Long id, RedirectAttributes redirectAttributes){
         try{
             this.userService.deleteById(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Xóa người dùng thành công!");
+            redirectAttributes.addFlashAttribute("successMessage", "XÃ³a ngÆ°á»i dÃ¹ng thÃ nh cÃ´ng!");
             return "redirect:/admin/users";
         }catch(Exception e){
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa người dùng: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Lá»—i khi xÃ³a ngÆ°á»i dÃ¹ng: " + e.getMessage());
             return "redirect:/admin/users";
         }
     }
@@ -309,78 +373,76 @@ public class AdminController {
         }
     }
 
-//    @GetMapping("/orders")
-//    public String orderManagement(Model model, @RequestParam(defaultValue = "0") int page,
-//                                  @RequestParam(defaultValue = "5") int size,
-//                                  @RequestParam(required = false, defaultValue = "") String status,
-//                                  @RequestParam(required = false, defaultValue = "updatedAt") String sortBy,
-//                                  @RequestParam(required = false, defaultValue = "DESC") String sortDir,
-//                                  @RequestParam(required = false, defaultValue = "") String keyword,
-//                                  @RequestParam(required = false,defaultValue = "line" )String chartType,
-//                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startUpdate,
-//                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endUpdate){
-////        List<Order> orders = orderService.getAllOrders();
-//        OrderFilter filter = new OrderFilter();
-//        filter.setStatus(status);
-//        filter.setSortBy(sortBy);
-//        filter.setSortDir(sortDir);
-//        filter.setSearch(keyword);
-//        if(startUpdate != null){
-//            filter.setStartUpdate(startUpdate.atStartOfDay());
-//        }
-//        if(endUpdate != null){
-//            filter.setEndUpdate(endUpdate.atStartOfDay().plusDays(1));
-//        }
-//
-//        List<Order> orders = orderService.getOrdersWithSpecs(filter);
-//        //List to page
-//        int start = Math.min(page * size, orders.size());
-//        int end = Math.min((page + 1) * size, orders.size());
-//        List<Order> pagedOrders = orders.subList(start, end);
-//        Page<Order> ordersPage = new PageImpl<>(pagedOrders, PageRequest.of(page, size), orders.size());
-//        //total amount
-//        double totalAmount = orders.stream()
-//                .mapToDouble(Order::getAmount)
-//                .sum();
-//
-//        // 4️⃣ Tính doanh thu theo tháng (YearMonth)
-//        double filteredAmount = ordersPage.stream().mapToDouble(Order::getAmount).sum();
-//        Map<YearMonth, Double> revenueByMonth = orders.stream()
-//                .collect(Collectors.groupingBy(
-//                        order -> YearMonth.from(order.getUpdatedAt()), // group theo tháng-năm của updatedAt
-//                        TreeMap::new, // sắp xếp theo thứ tự thời gian
-//                        Collectors.summingDouble(Order::getAmount)
-//                ));
-//
-//        // 5️⃣ Chuyển sang 2 danh sách để hiển thị trên biểu đồ (JS dễ dùng)
-//        List<String> monthLabels = revenueByMonth.keySet().stream()
-//                .map(ym -> ym.toString()) // dạng "2025-01"
-//                .toList();
-//        List<Double> monthTotals = new ArrayList<>(revenueByMonth.values());
-//
-//        model.addAttribute("startUpdate", startUpdate);
-//        model.addAttribute("endUpdate", endUpdate);
-//        model.addAttribute("orders", ordersPage);
-//        model.addAttribute("allStatuses", Order.OrderStatus.values());
-//        model.addAttribute("currentPage", page);
-//        model.addAttribute("totalPages", ordersPage.getTotalPages());
-//        model.addAttribute("pageSize", size);
-//        model.addAttribute("filter", filter);
-//        model.addAttribute("chartType", chartType);
-//        model.addAttribute("totalAmount", totalAmount);
-//        model.addAttribute("allOrders", orders);
-//        model.addAttribute("monthLabels", monthLabels);
-//        model.addAttribute("monthTotals", monthTotals);
-//        return "admin/orderDashboard";
-//    }
-//
-//    @GetMapping("/orders/{orderId}")
-//    public String orderDetail(@PathVariable Long orderId, Model model){
-//        Order order = orderService.getOrderById(orderId);
-//        if(order == null){
-//            return "redirect:/admin/orders";
-//        }
-//        model.addAttribute("order", order);
-//        return "admin/orderDetail";
-//    }
+    @GetMapping("/orders")
+    public String orderManagement(Model model, @RequestParam(defaultValue = "0") int page,
+                                  @RequestParam(defaultValue = "5") int size,
+                                  @RequestParam(required = false, defaultValue = "") String status,
+                                  @RequestParam(required = false, defaultValue = "updatedAt") String sortBy,
+                                  @RequestParam(required = false, defaultValue = "DESC") String sortDir,
+                                  @RequestParam(required = false, defaultValue = "") String keyword,
+                                  @RequestParam(required = false,defaultValue = "line" )String chartType,
+                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startUpdate,
+                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endUpdate){
+        OrderFilter filter = new OrderFilter();
+        filter.setStatus(status);
+        filter.setSortBy(sortBy);
+        filter.setSortDir(sortDir);
+        filter.setSearch(keyword);
+        if(startUpdate != null){
+            filter.setStartUpdate(startUpdate.atStartOfDay());
+        }
+        if(endUpdate != null){
+            filter.setEndUpdate(endUpdate.atStartOfDay().plusDays(1));
+        }
+
+        List<Order> orders = orderService.getOrdersWithSpecs(filter);
+        //List to page
+        int start = Math.min(page * size, orders.size());
+        int end = Math.min((page + 1) * size, orders.size());
+        List<Order> pagedOrders = orders.subList(start, end);
+        Page<Order> ordersPage = new PageImpl<>(pagedOrders, PageRequest.of(page, size), orders.size());
+        //total amount
+        double totalAmount = orders.stream()
+                .mapToDouble(Order::getAmount)
+                .sum();
+
+        // TÃ­nh doanh thu theo thÃ¡ng (YearMonth)
+        Map<YearMonth, Double> revenueByMonth = orders.stream()
+                .collect(Collectors.groupingBy(
+                        order -> YearMonth.from(order.getUpdatedAt()),
+                        TreeMap::new,
+                        Collectors.summingDouble(Order::getAmount)
+                ));
+
+        // Chuyá»ƒn sang 2 danh sÃ¡ch Ä‘á»ƒ hiá»ƒn thá»‹ trÃªn biá»ƒu Ä‘á»“
+        List<String> monthLabels = revenueByMonth.keySet().stream()
+                .map(ym -> ym.toString())
+                .toList();
+        List<Double> monthTotals = new ArrayList<>(revenueByMonth.values());
+
+        model.addAttribute("startUpdate", startUpdate);
+        model.addAttribute("endUpdate", endUpdate);
+        model.addAttribute("orders", ordersPage);
+        model.addAttribute("allStatuses", Order.OrderStatus.values());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", ordersPage.getTotalPages());
+        model.addAttribute("pageSize", size);
+        model.addAttribute("filter", filter);
+        model.addAttribute("chartType", chartType);
+        model.addAttribute("totalAmount", totalAmount);
+        model.addAttribute("allOrders", orders);
+        model.addAttribute("monthLabels", monthLabels);
+        model.addAttribute("monthTotals", monthTotals);
+        return "admin/orderDashboard";
+    }
+
+    @GetMapping("/orders/{orderId}")
+    public String orderDetail(@PathVariable Long orderId, Model model){
+        Order order = orderService.getOrderById(orderId);
+        if(order == null){
+            return "redirect:/admin/orders";
+        }
+        model.addAttribute("order", order);
+        return "admin/orderDetail";
+    }
 }

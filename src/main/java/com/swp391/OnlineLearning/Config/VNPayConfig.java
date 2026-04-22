@@ -1,8 +1,4 @@
-<<<<<<< HEAD:src/main/java/com/swp391/OnlineLearning/Config/VNPayConfig.java
-package com.swp391.OnlineLearning.Config;
-=======
 package com.swp391.OnlineLearning.config;
->>>>>>> main:src/main/java/com/swp391/OnlineLearning/config/VNPayConfig.java
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -20,8 +16,8 @@ public class VNPayConfig {
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static String vnp_ReturnUrl = "http://localhost:8080/payment/vnpay-return";
     public static String vnp_IpnUrl = "http://localhost:8080/payment/vnpay-ipn";
-    public static String vnp_TmnCode = "MWL02DIA";
-    public static String secretKey = "BWLEAI0S4KRVBG9DW6PFCBHQE5DBDCMX";
+    public static String vnp_TmnCode = "0A88A4ZP";
+    public static String secretKey = "BLETSZ08ITCSIV7TCG82KX83EYO1V3GN";
     public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
     public static String vnp_Version = "2.1.0";
     public static String vnp_Command = "pay";

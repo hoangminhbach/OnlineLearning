@@ -12,6 +12,9 @@ import java.util.Optional;
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     Enrollment findByCourseId(Long courseId);
 
+    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.id = :courseId")
+    long countByCourseId(@Param("courseId") Long courseId);
+
     @Query("SELECT e FROM Enrollment e JOIN FETCH e.course WHERE e.user = :user")
     List<Enrollment> findByUserWithCourse(@Param("user") User user);
 
@@ -25,7 +28,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             "JOIN FETCH e.course c " +
             "LEFT JOIN FETCH c.chapters chap " +
             "LEFT JOIN FETCH chap.lessons l " +
-            "WHERE e.id = :enrollmentId AND e.user.id = :userId") // Thêm check userId cho an toàn
+            "WHERE e.id = :enrollmentId AND e.user.id = :userId") // ThÃªm check userId cho an toÃ n
     Optional<Enrollment> findByIdAndUserIdWithFullCourseStructure(@Param("enrollmentId") long enrollmentId, @Param("userId") long userId);
 
     List<Enrollment> findByUserId(long userId);

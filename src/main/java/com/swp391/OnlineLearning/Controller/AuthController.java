@@ -1,11 +1,5 @@
 package com.swp391.OnlineLearning.controller;
 
-<<<<<<< HEAD
-import com.swp391.OnlineLearning.Model.Token;
-import com.swp391.OnlineLearning.Model.User;
-import com.swp391.OnlineLearning.Model.dto.UserDTO;
-import com.swp391.OnlineLearning.Service.*;
-=======
 import com.swp391.OnlineLearning.model.Course;
 import com.swp391.OnlineLearning.model.Slider;
 import com.swp391.OnlineLearning.model.Token;
@@ -14,7 +8,6 @@ import com.swp391.OnlineLearning.model.dto.BlogDTO;
 import com.swp391.OnlineLearning.model.dto.CourseFeedbackStats;
 import com.swp391.OnlineLearning.model.dto.UserDTO;
 import com.swp391.OnlineLearning.service.*;
->>>>>>> main
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,15 +18,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-<<<<<<< HEAD
+import java.security.Principal;
 import java.time.LocalDateTime;
-=======
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
->>>>>>> main
+
 
 @Controller
 public class AuthController {
@@ -141,65 +133,7 @@ public class AuthController {
         return "auth/login";
     }
 
-    // ---------------- FORGOT PASSWORD ----------------
-    @GetMapping("/forgotPassword")
-    public String showForgotPasswordForm() {
-        return "auth/forgotPassword";
-    }
 
-<<<<<<< HEAD
-    @PostMapping("/register")
-    public String registerUserAccount(@ModelAttribute("user") @Valid UserDTO userDTO,
-                                      BindingResult bindingResult,
-                                      RedirectAttributes redirectAttributes) {
-        if (bindingResult.hasErrors()) {
-            return "auth/register";
-        }
-        try {
-            userService.ensureEmailNotExists(userDTO.getEmail());
-            User newUser = userService.buildNewUser(userDTO);
-            Token newToken = tokenService.create(newUser);
-            emailService.sendTokenEmail(newUser.getEmail(), newToken.getToken(), EmailService.EmailType.REGISTER);
-
-            redirectAttributes.addFlashAttribute("message",
-                    "Account created successfully. Please check your email for verification.");
-            return "redirect:/login";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/register";
-        }
-    }
-
-    // ---------------- EMAIL CONFIRMATION ----------------
-
-    @GetMapping("/confirmToken")
-    public String confirmToken(@RequestParam("token") String tokenValue,
-                               RedirectAttributes redirectAttributes) {
-        try {
-            Token token = tokenService.checkValidToken(tokenValue);
-            token.setConfirmed_at(LocalDateTime.now());
-            tokenService.save(token);
-
-            User user = token.getUser();
-            user.setEnabled(true);
-            userService.save(user);
-
-            redirectAttributes.addFlashAttribute("message",
-                    "Your account has been confirmed. You can now login!");
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-        }
-        return "redirect:/login";
-    }
-
-    // ---------------- FORGOT PASSWORD ----------------
-    @GetMapping("/forgotPassword")
-    public String showForgotPasswordForm() {
-        return "auth/forgotPassword";
-    }
-
-=======
->>>>>>> main
     @PostMapping("/forgotPassword")
     public String processForgotPasswordForm(@RequestParam("email") String email,
                                             RedirectAttributes redirectAttributes) {
@@ -217,12 +151,6 @@ public class AuthController {
         return "redirect:/forgotPassword";
     }
 
-<<<<<<< HEAD
-    // ---------------- RESET PASSWORD ----------------
-=======
-// ---------------- RESET PASSWORD ----------------
-
->>>>>>> main
     @GetMapping("/resetPassword")
     public String showResetForm(@RequestParam("token") String token, Model model) {
         model.addAttribute("token", token);
@@ -259,10 +187,6 @@ public class AuthController {
         }
     }
 
-<<<<<<< HEAD
-
-=======
-    //---------------------------- CHANGE PASSWORD -----------------------------
     @GetMapping("/changePassword")
     public String showChangePasswordForm(Model model) {
         return "auth/changePassword";
@@ -280,18 +204,19 @@ public class AuthController {
                 throw new IllegalArgumentException("Passwords do not match!");
             }
             User currentUser = userService.findByEmailAndEnabledTrue(principal.getName()).orElseThrow();
-            if (!userService.isOldPasswordCorrect(currentUser, oldPassword)){
+            if (!userService.isOldPasswordCorrect(currentUser, oldPassword)) {
                 throw new IllegalArgumentException("Old password is incorrect!");
-            };
+            }
+            ;
             userService.updatePassword(currentUser, newPassword);
 
             redirectAttributes.addFlashAttribute("message",
                     "Password updated successfully. Please login with your new password.");
             return "redirect:/login";
-        }catch (Exception e) {
+        } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/changePassword";
         }
+
     }
->>>>>>> main
 }

@@ -1,16 +1,11 @@
 package com.swp391.OnlineLearning.service.impl;
 
-import com.swp391.OnlineLearning.model.Lesson;
-import com.swp391.OnlineLearning.model.Question;
-import com.swp391.OnlineLearning.model.QuizAttemptQuestion;
-import com.swp391.OnlineLearning.model.QuizAttemptSelectedOption;
-import com.swp391.OnlineLearning.model.dto.AnsweredOption;
 import com.swp391.OnlineLearning.repository.QuizAttemptQuestionRepository;
 import com.swp391.OnlineLearning.service.QuizAttemptQuestionService;
+import com.swp391.OnlineLearning.model.QuizAttemptQuestion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 
 @Service

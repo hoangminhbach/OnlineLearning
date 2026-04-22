@@ -1,5 +1,6 @@
-package com.swp391.OnlineLearning.Service;
+package com.swp391.OnlineLearning.service;
 
+//import com.swp391.OnlineLearning.model.Enrollment;
 import com.swp391.OnlineLearning.model.Enrollment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -83,7 +84,7 @@ public class EmailService {
                 """, url);
     }
 
-    // Enum để tránh hard-code string
+    // Enum Ä‘á»ƒ trÃ¡nh hard-code string
     public enum EmailType {
         REGISTER("Welcome to Online English Learning System!"),
         FORGOT_PASSWORD("Reset Password"),

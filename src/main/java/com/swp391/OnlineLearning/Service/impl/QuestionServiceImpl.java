@@ -1,9 +1,9 @@
 package com.swp391.OnlineLearning.service.impl;
 
-import com.swp391.OnlineLearning.model.Question;
 import com.swp391.OnlineLearning.repository.QuestionRepository;
 import com.swp391.OnlineLearning.service.QuestionService;
-import com.swp391.OnlineLearning.service.specification.QuestionSpecs;
+import com.swp391.OnlineLearning.service.Specification.QuestionSpecs;
+import com.swp391.OnlineLearning.model.Question;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 

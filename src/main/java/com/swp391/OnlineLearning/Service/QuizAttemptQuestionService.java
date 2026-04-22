@@ -1,10 +1,7 @@
 package com.swp391.OnlineLearning.service;
 
 import com.swp391.OnlineLearning.model.QuizAttemptQuestion;
-import com.swp391.OnlineLearning.model.QuizAttemptSelectedOption;
-import com.swp391.OnlineLearning.model.dto.AnsweredOption;
 
-import java.util.HashMap;
 import java.util.List;
 
 public interface QuizAttemptQuestionService{

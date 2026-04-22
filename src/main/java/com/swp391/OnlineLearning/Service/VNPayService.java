@@ -1,13 +1,10 @@
 package com.swp391.OnlineLearning.service;
 
 import com.swp391.OnlineLearning.config.VNPayConfig;
-import com.swp391.OnlineLearning.model.Order; // Import Order
+import com.swp391.OnlineLearning.model.Order;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -52,7 +49,7 @@ public class VNPayService {
         vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
@@ -61,10 +58,10 @@ public class VNPayService {
         String vnp_ExpireDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
 
-        //tạo hashData để chuẩn bị gán vào vnp_SecureHash
+        //táº¡o hashData Ä‘á»ƒ chuáº©n bá»‹ gÃ¡n vÃ o vnp_SecureHash
         String hashData = VNPayConfig.buildHashData(vnp_Params);
 
-        //tạo query gửi sang vnpay
+        //táº¡o query gá»­i sang vnpay
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
         StringBuilder query = new StringBuilder();
@@ -76,7 +73,7 @@ public class VNPayService {
                 //Build query
                 query.append(fieldName);
                 query.append('=');
-                query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+                query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
                 if (itr.hasNext()) {
                     query.append('&');
                 }
