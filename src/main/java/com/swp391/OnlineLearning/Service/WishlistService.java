@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WishlistService {
+
     Wishlist createNew(Long userId, Long courseId);
 
     List<Wishlist> findByUserId(Long userId);
@@ -14,4 +15,6 @@ public interface WishlistService {
     void delete(Long wishlistId);
 
     Optional<Wishlist> findByUserIdAndCourseId(Long userId, Long courseId);
+
+    void removeByUserAndCourse(Long userId, Long courseId);
 }

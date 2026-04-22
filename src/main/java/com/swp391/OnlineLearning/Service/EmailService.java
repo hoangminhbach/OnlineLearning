@@ -1,6 +1,7 @@
 package com.swp391.OnlineLearning.Service;
 
-import com.swp391.OnlineLearning.model.Enrollment;
+//import com.swp391.OnlineLearning.Model.Enrollment;
+import com.swp391.OnlineLearning.Model.Enrollment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;

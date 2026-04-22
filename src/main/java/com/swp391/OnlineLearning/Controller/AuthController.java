@@ -25,15 +25,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-<<<<<<< HEAD
+import java.security.Principal;
 import java.time.LocalDateTime;
-=======
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
->>>>>>> main
+
 
 @Controller
 public class AuthController {
@@ -140,14 +139,11 @@ public class AuthController {
         model.addAttribute("user", new User());
         return "auth/login";
     }
-
-    // ---------------- FORGOT PASSWORD ----------------
     @GetMapping("/forgotPassword")
     public String showForgotPasswordForm() {
         return "auth/forgotPassword";
     }
 
-<<<<<<< HEAD
     @PostMapping("/register")
     public String registerUserAccount(@ModelAttribute("user") @Valid UserDTO userDTO,
                                       BindingResult bindingResult,
@@ -198,8 +194,6 @@ public class AuthController {
         return "auth/forgotPassword";
     }
 
-=======
->>>>>>> main
     @PostMapping("/forgotPassword")
     public String processForgotPasswordForm(@RequestParam("email") String email,
                                             RedirectAttributes redirectAttributes) {
@@ -217,12 +211,6 @@ public class AuthController {
         return "redirect:/forgotPassword";
     }
 
-<<<<<<< HEAD
-    // ---------------- RESET PASSWORD ----------------
-=======
-// ---------------- RESET PASSWORD ----------------
-
->>>>>>> main
     @GetMapping("/resetPassword")
     public String showResetForm(@RequestParam("token") String token, Model model) {
         model.addAttribute("token", token);
@@ -259,10 +247,6 @@ public class AuthController {
         }
     }
 
-<<<<<<< HEAD
-
-=======
-    //---------------------------- CHANGE PASSWORD -----------------------------
     @GetMapping("/changePassword")
     public String showChangePasswordForm(Model model) {
         return "auth/changePassword";
@@ -280,18 +264,19 @@ public class AuthController {
                 throw new IllegalArgumentException("Passwords do not match!");
             }
             User currentUser = userService.findByEmailAndEnabledTrue(principal.getName()).orElseThrow();
-            if (!userService.isOldPasswordCorrect(currentUser, oldPassword)){
+            if (!userService.isOldPasswordCorrect(currentUser, oldPassword)) {
                 throw new IllegalArgumentException("Old password is incorrect!");
-            };
+            }
+            ;
             userService.updatePassword(currentUser, newPassword);
 
             redirectAttributes.addFlashAttribute("message",
                     "Password updated successfully. Please login with your new password.");
             return "redirect:/login";
-        }catch (Exception e) {
+        } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/changePassword";
         }
+
     }
->>>>>>> main
 }
