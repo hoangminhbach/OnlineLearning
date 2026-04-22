@@ -8,6 +8,8 @@ import com.swp391.OnlineLearning.repository.CourseRepository;
 import com.swp391.OnlineLearning.repository.UserRepository;
 import com.swp391.OnlineLearning.service.SliderService;
 import com.swp391.OnlineLearning.service.UserService;
+import com.swp391.OnlineLearning.service.BlogService;
+import com.swp391.OnlineLearning.model.dto.BlogDTO;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -30,13 +32,15 @@ public class MarketingController {
     private final BlogRepository blogRepository;
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
+    private final BlogService blogService;
 
-    public MarketingController(SliderService sliderService, UserService userService, BlogRepository blogRepository, CourseRepository courseRepository, UserRepository userRepository) {
+    public MarketingController(SliderService sliderService, UserService userService, BlogRepository blogRepository, CourseRepository courseRepository, UserRepository userRepository, BlogService blogService) {
         this.sliderService = sliderService;
         this.userService = userService;
         this.blogRepository = blogRepository;
         this.courseRepository = courseRepository;
         this.userRepository = userRepository;
+        this.blogService = blogService;
     }
 
     @GetMapping("")
@@ -185,4 +189,55 @@ public class MarketingController {
         return "redirect:/marketing/sliders";
     }
 
+    @GetMapping("/blogs")
+    public String manageBlogs(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model,
+            HttpSession session) {
+        try {
+            Long userId = (Long) session.getAttribute("currentUserId");
+            User currentUser = userService.getUserById(userId);
+            model.addAttribute("currentUser", currentUser);
+
+            Page<BlogDTO> blogPage = blogService.getBlogsForMarketing(keyword, status, page, size);
+            model.addAttribute("blogPage", blogPage);
+            model.addAttribute("keyword", keyword != null ? keyword : "");
+            model.addAttribute("status", status);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("currentSize", size);
+
+            int totalPages = blogPage.getTotalPages();
+            int startPage = Math.max(0, page - 2);
+            int endPage = Math.min(totalPages - 1, page + 2);
+
+            model.addAttribute("startPage", startPage);
+            model.addAttribute("endPage", endPage);
+            model.addAttribute("totalPages", totalPages);
+
+            return "marketing/blog-management";
+        } catch (Exception e) {
+            return "redirect:/marketing";
+        }
+    }
+
+    @GetMapping("/blogs/{id}")
+    public String getBlogDetails(@PathVariable Long id, Model model, HttpSession session) {
+        try {
+            Long userId = (Long) session.getAttribute("currentUserId");
+            User currentUser = userService.getUserById(userId);
+            model.addAttribute("currentUser", currentUser);
+
+            BlogDTO blog = blogService.getBlogByIdForMarketing(id);
+            if (blog == null) {
+                return "redirect:/marketing";
+            }
+            model.addAttribute("blog", blog);
+            return "marketing/blog-details";
+        } catch (Exception e) {
+            return "redirect:/marketing";
+        }
+    }
 }

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Bài Viết | Marketing Dashboard</title>
+    <!-- Premium Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" th:href="@{/css/marketing-dashboard.css}">
+    <style>
+        .filter-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--color-surface);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-diffusion);
+            align-items: flex-end;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+        }
+
+        .form-control {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg);
+            color: var(--color-text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all var(--transition-fast);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px var(--color-accent-light);
+        }
+
+        .btn-filter {
+            padding: 0.75rem 1.5rem;
+            background: var(--color-text-main);
+            color: var(--color-surface);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-filter:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .blog-table-container {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-diffusion);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--color-bg);
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        td {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--color-border);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: var(--color-surface-hover);
+        }
+
+        .blog-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .blog-thumb {
+            width: 80px;
+            height: 50px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+            background: var(--color-bg);
+        }
+
+        .blog-title {
+            font-weight: 600;
+            color: var(--color-text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .blog-category {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+        }
+
+        .action-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .action-link:hover {
+            background: var(--color-accent);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-text-main);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+
+        .page-link:hover {
+            background: var(--color-surface-hover);
+            border-color: var(--color-text-muted);
+        }
+
+        .page-link.active {
+            background: var(--color-text-main);
+            color: var(--color-surface);
+            border-color: var(--color-text-main);
+        }
+
+        .page-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-brand">OELS</div>
+        <nav class="sidebar-nav">
+            <a th:href="@{/marketing}" class="nav-item">
+                <i class="ph ph-squares-four"></i> Dashboard
+            </a>
+            <a th:href="@{/marketing/sliders}" class="nav-item">
+                <i class="ph ph-image"></i> Quản lý Slider
+            </a>
+            <a th:href="@{/marketing/blogs}" class="nav-item active">
+                <i class="ph-fill ph-article"></i> Quản lý Blog
+            </a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <header class="nav-header">
+            <div class="brand">
+                <i class="ph-fill ph-article"></i>
+                <span>Danh sách Bài viết</span>
+            </div>
+            
+            <div class="user-module" th:if="${currentUser != null}">
+                <div class="user-avatar" th:text="${#strings.substring(currentUser.fullName, 0, 1)}">U</div>
+                <span class="font-medium" th:text="${currentUser.fullName}">User</span>
+                <form th:action="@{/logout}" method="post" style="margin:0;">
+                    <button type="submit" class="logout-btn" title="Đăng xuất">
+                        <i class="ph ph-sign-out"></i>
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <!-- Filters -->
+        <form th:action="@{/marketing/blogs}" method="get" class="filter-form">
+            <div class="form-group" style="flex: 2;">
+                <label for="keyword">Tìm kiếm</label>
+                <input type="text" id="keyword" name="keyword" class="form-control" th:value="${keyword}" placeholder="Tìm theo tiêu đề, mô tả...">
+            </div>
+            <div class="form-group">
+                <label for="status">Trạng thái</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="" th:selected="${status == null or status == ''}">Tất cả trạng thái</option>
+                    <option value="PUBLISHED" th:selected="${status == 'PUBLISHED'}">Đã xuất bản</option>
+                    <option value="DRAFT" th:selected="${status == 'DRAFT'}">Bản nháp</option>
+                    <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">Đã hủy</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-filter">
+                <i class="ph ph-funnel"></i> Lọc
+            </button>
+            <a th:href="@{/marketing/blogs}" class="page-link" style="padding: 0 1.5rem; text-decoration: none;">
+                Xóa lọc
+            </a>
+        </form>
+
+        <!-- Data Table -->
+        <div class="blog-table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bài viết</th>
+                        <th>Tác giả</th>
+                        <th>Ngày tạo</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="blog : ${blogPage.content}">
+                        <td>
+                            <div class="blog-info">
+                                <img th:if="${blog.thumbnail != null}" th:src="@{${blog.thumbnail}}" alt="Thumbnail" class="blog-thumb">
+                                <div th:if="${blog.thumbnail == null}" class="blog-thumb" style="display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:var(--color-text-muted);">
+                                    <i class="ph ph-image"></i>
+                                </div>
+                                <div>
+                                    <div class="blog-title" th:text="${blog.title}">Tiêu đề bài viết</div>
+                                    <div class="blog-category" th:text="${blog.categoryName}">Tên danh mục</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${blog.authorName}">Tên tác giả</td>
+                        <td style="font-family: var(--font-mono); font-size: 0.875rem;" th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy')}">
+                            01/01/2023
+                        </td>
+                        <td>
+                            <span class="status-badge active" th:if="${blog.status != null and blog.status.name() == 'PUBLISHED'}">Đã xuất bản</span>
+                            <span class="status-badge inactive" th:if="${blog.status != null and blog.status.name() == 'DRAFT'}">Bản nháp</span>
+                            <span class="status-badge inactive" th:if="${blog.status != null and blog.status.name() == 'CANCELLED'}">Đã hủy</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/marketing/blogs/{id}(id=${blog.id})}" class="action-link">
+                                Xem chi tiết <i class="ph ph-arrow-right"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${blogPage.content.empty}">
+                        <td colspan="5" style="text-align: center; padding: 3rem; color: var(--color-text-muted);">
+                            <i class="ph ph-empty" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                            Không tìm thấy bài viết nào phù hợp.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:href="@{/marketing/blogs(page=${currentPage - 1}, size=${currentSize}, keyword=${keyword}, status=${status})}" 
+               class="page-link" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                <i class="ph ph-caret-left"></i>
+            </a>
+
+            <span th:each="i : ${#numbers.sequence(startPage, endPage)}">
+                <a th:href="@{/marketing/blogs(page=${i}, size=${currentSize}, keyword=${keyword}, status=${status})}" 
+                   class="page-link" th:classappend="${currentPage == i} ? 'active' : ''" th:text="${i + 1}">1</a>
+            </span>
+
+            <a th:href="@{/marketing/blogs(page=${currentPage + 1}, size=${currentSize}, keyword=${keyword}, status=${status})}" 
+               class="page-link" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+                <i class="ph ph-caret-right"></i>
+            </a>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết bài viết | Marketing Dashboard</title>
+    <!-- Premium Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" th:href="@{/css/marketing-dashboard.css}">
+    <style>
+        .article-panel {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            box-shadow: var(--shadow-diffusion);
+        }
+        
+        .article-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .article-thumbnail {
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            margin-bottom: 2rem;
+        }
+
+        .article-content {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: var(--color-text-main);
+        }
+
+        .article-content h1, .article-content h2, .article-content h3 {
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .article-content p {
+            margin-bottom: 1.5rem;
+        }
+
+        .article-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--radius-sm);
+        }
+
+        .meta-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-diffusion);
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .meta-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .meta-label {
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .meta-value {
+            font-weight: 700;
+            font-size: 0.875rem;
+            text-align: right;
+        }
+
+        .meta-value.mono {
+            font-family: var(--font-mono);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            margin-bottom: 2rem;
+            transition: color var(--transition-fast);
+        }
+
+        .back-link:hover {
+            color: var(--color-text-main);
+        }
+
+        .status-badge.large {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border-radius: var(--radius-md);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Asymmetric Header -->
+        <header class="nav-header">
+            <div class="brand">
+                <i class="ph-fill ph-chart-polar"></i>
+                <span>OELS Marketing</span>
+            </div>
+            
+            <div class="user-module" th:if="${currentUser != null}">
+                <div class="user-avatar" th:text="${#strings.substring(currentUser.fullName, 0, 1)}">U</div>
+                <span class="font-medium" th:text="${currentUser.fullName}">User</span>
+                <form th:action="@{/logout}" method="post" style="margin:0;">
+                    <button type="submit" class="logout-btn" title="Đăng xuất">
+                        <i class="ph ph-sign-out"></i>
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <a th:href="@{/marketing}" class="back-link">
+            <i class="ph ph-arrow-left"></i> Quay lại Dashboard
+        </a>
+
+        <!-- Layout Split -->
+        <div class="dashboard-grid">
+            
+            <!-- Main Content: Blog Article -->
+            <section class="article-panel">
+                <h1 class="article-title" th:text="${blog.title}">Tiêu đề bài viết</h1>
+                
+                <img th:if="${blog.thumbnail != null and !blog.thumbnail.isEmpty()}" 
+                     th:src="@{${blog.thumbnail}}" 
+                     alt="Thumbnail" 
+                     class="article-thumbnail" 
+                     onerror="this.style.display='none'">
+                     
+                <div class="article-content" th:utext="${blog.getFormattedContent()}">
+                    Nội dung bài viết sẽ hiển thị ở đây.
+                </div>
+            </section>
+
+            <!-- Sidebar: Metadata & Actions -->
+            <aside>
+                <div class="section-header">
+                    <i class="ph-fill ph-info"></i>
+                    Thông tin chi tiết
+                </div>
+                
+                <div class="meta-card">
+                    <div class="meta-row">
+                        <span class="meta-label">Trạng thái</span>
+                        <span class="meta-value">
+                            <span class="status-badge active large" th:if="${blog.status != null and blog.status.name() == 'PUBLISHED'}">Đã xuất bản</span>
+                            <span class="status-badge inactive large" th:if="${blog.status != null and blog.status.name() == 'DRAFT'}">Bản nháp</span>
+                            <span class="status-badge inactive large" th:if="${blog.status != null and blog.status.name() == 'CANCELLED'}">Đã hủy</span>
+                        </span>
+                    </div>
+
+                    <div class="meta-row">
+                        <span class="meta-label">Mã bài viết</span>
+                        <span class="meta-value mono" th:text="${'#' + blog.id}">#1</span>
+                    </div>
+
+                    <div class="meta-row">
+                        <span class="meta-label">Tác giả</span>
+                        <span class="meta-value" th:text="${blog.authorName}">Tên tác giả</span>
+                    </div>
+
+                    <div class="meta-row">
+                        <span class="meta-label">Danh mục</span>
+                        <span class="meta-value" th:text="${blog.categoryName}">Danh mục</span>
+                    </div>
+
+                    <div class="meta-row" th:if="${blog.createdAt != null}">
+                        <span class="meta-label">Ngày tạo</span>
+                        <span class="meta-value mono" th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2023</span>
+                    </div>
+
+                    <div class="meta-row" th:if="${blog.updatedAt != null}">
+                        <span class="meta-label">Cập nhật lần cuối</span>
+                        <span class="meta-value mono" th:text="${#temporals.format(blog.updatedAt, 'dd/MM/yyyy HH:mm')}">01/01/2023</span>
+                    </div>
+                </div>
+
+                <div class="section-header" style="margin-top: 2rem;">
+                    <i class="ph-fill ph-lightning"></i>
+                    Thao tác
+                </div>
+
+                <div class="actions-panel">
+                    <button class="action-btn" onclick="alert('Tính năng chỉnh sửa sẽ được cập nhật trong phiên bản sau.')" style="width: 100%; text-align: left;">
+                        <div class="action-icon">
+                            <i class="ph-fill ph-pencil-simple"></i>
+                        </div>
+                        <div class="action-content">
+                            <div class="action-title">Chỉnh sửa bài viết</div>
+                            <div class="action-desc">Cập nhật nội dung và thông tin</div>
+                        </div>
+                    </button>
+                </div>
+            </aside>
+
+        </div>
+    </div>
+
+</body>
+</html>

@@ -29,7 +29,26 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
+    public BlogDTO getBlogByIdForMarketing(Long blogId) {
+        return this.blogRepository.findBlogById(blogId);
+    }
+
+    @Override
     public List<BlogDTO> findLatestBlogs(int i) {
         return this.blogRepository.findLatestPublishedBlogs(PageRequest.of(0, i));
+    }
+
+    @Override
+    public Page<BlogDTO> getBlogsForMarketing(String keyword, String statusStr, int page, int size) {
+        Blog.BlogStatus status = null;
+        if (statusStr != null && !statusStr.isEmpty()) {
+            try {
+                status = Blog.BlogStatus.valueOf(statusStr);
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid status
+            }
+        }
+        Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
+        return this.blogRepository.findAllBlogsForMarketing(keyword, status, pageable);
     }
 }
