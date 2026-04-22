@@ -1,415 +1,605 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tạo Slider Mới</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Slider Mới | Premium Dashboard</title>
+    <!-- Premium Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" th:href="@{/css/marketing-dashboard.css}">
     <style>
+        /* ==========================================
+           PREMIUM DESIGN OVERRIDES (BENTO 2.0 ADVANCED)
+           ========================================== */
         :root {
-            --primary-color: #6c63ff;
-            --primary-hover: #5a54d6;
-            --secondary-color: #4ecdc4;
-            --text-color: #333;
-            --text-light: #666;
-            --bg-color: #fff;
-            --bg-light: #f8f9fa;
-            --border-color: #e9ecef;
-            --shadow: 0 4px 20px rgba(0,0,0,0.08);
-            --radius: 12px;
+            --premium-bg: #fdfdfc;
+            --premium-surface: rgba(255, 255, 255, 0.85);
+            --premium-border: rgba(9, 9, 11, 0.08); /* zinc-950 at 8% */
+            --premium-text: #09090b; /* zinc-950 */
+            --premium-muted: #71717a; /* zinc-500 */
+            --premium-accent: #18181b; /* zinc-900 */
+            --premium-focus: rgba(24, 24, 27, 0.1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Override the default main-content background for this specific view to give it an art-gallery vibe */
+        .main-content {
+            background-color: var(--premium-bg);
+            background-image: radial-gradient(rgba(0,0,0,0.04) 1px, transparent 1px);
+            background-size: 24px 24px;
+            padding: 2rem 3rem 4rem;
+            min-height: 100vh;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
+        /* Nav Header Override for cleanliness */
+        .nav-header {
+            background: transparent;
+            border-bottom: none;
+            padding: 0 0 3rem 0;
+            margin-bottom: 0;
         }
 
-        .container {
-            max-width: 800px;
+        /* Asymmetric Split Layout */
+        .premium-bento-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 4rem;
+            max-width: 1280px;
             margin: 0 auto;
-            background: var(--bg-color);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 30px;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
+        @media (min-width: 1024px) {
+            .premium-bento-layout {
+                grid-template-columns: 380px 1fr;
+                align-items: start;
+            }
         }
 
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 28px;
-            font-weight: 600;
+        /* Left Side: Typography & Guidance */
+        .creation-header {
+            position: sticky;
+            top: 2rem;
+            animation: slideFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
+        .premium-title {
+            font-family: 'Satoshi', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+            color: var(--premium-text);
+            margin-bottom: 1.5rem;
         }
 
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
+        .premium-subtitle {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            color: var(--premium-muted);
+            max-width: 90%;
+            margin-bottom: 2rem;
         }
 
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
+        /* Right Side: Liquid Glass Form */
+        .glass-panel {
+            background: var(--premium-surface);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border-radius: 2rem;
+            border: 1px solid var(--premium-border);
+            box-shadow: 
+                inset 0 1px 0 rgba(255,255,255,1),
+                0 24px 48px -12px rgba(0,0,0,0.05);
+            padding: 3rem 3.5rem;
+            animation: slideFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.1s;
+            opacity: 0;
         }
 
-        .btn-secondary {
-            background: var(--text-light);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: var(--text-color);
-        }
-
+        /* Staggered Form Fields */
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            animation: slideFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+
+        .form-group:nth-child(1) { animation-delay: 0.2s; }
+        .form-group:nth-child(2) { animation-delay: 0.25s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.35s; }
+        .form-group:nth-child(5) { animation-delay: 0.4s; }
 
         .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--premium-text);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
 
         .form-group label.required::after {
-            content: " *";
-            color: #dc3545;
+            content: "";
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #f43f5e; /* rose-500 */
+            margin-left: 0.5rem;
+            box-shadow: 0 0 8px rgba(244, 63, 94, 0.5);
         }
 
+        /* Inputs */
         .form-control {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius);
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background: var(--bg-color);
+            padding: 1.25rem 1.5rem;
+            background: #f4f4f5; /* zinc-100 */
+            border: 1px solid transparent;
+            border-radius: 1rem;
+            color: var(--premium-text);
+            font-family: inherit;
+            font-size: 1.0625rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .form-control::placeholder {
+            color: #a1a1aa; /* zinc-400 */
+            font-weight: 400;
+        }
+
+        .form-control:hover {
+            background: #e4e4e7; /* zinc-200 */
         }
 
         .form-control:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+            background: #ffffff;
+            border-color: var(--premium-accent);
+            box-shadow: 0 0 0 4px var(--premium-focus);
+            transform: translateY(-2px);
         }
 
         textarea.form-control {
+            min-height: 140px;
             resize: vertical;
-            min-height: 100px;
+            line-height: 1.6;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 2rem;
         }
 
+        /* Select styling override */
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2309090b' viewBox='0 0 256 256'%3E%3Cpath d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1.5rem center;
+            padding-right: 3rem;
+        }
+
+        /* File Upload */
         .file-upload {
             position: relative;
-            display: inline-block;
-            cursor: pointer;
+            display: block;
             width: 100%;
         }
 
         .file-upload input[type="file"] {
             position: absolute;
-            left: -9999px;
+            width: 0;
+            height: 0;
+            opacity: 0;
         }
 
         .file-upload-label {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px 20px;
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius);
-            background: var(--bg-light);
+            padding: 4rem 2rem;
+            background: #f4f4f5;
+            border: 2px dashed #d4d4d8;
+            border-radius: 1.5rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .file-upload-label::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.8), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
         }
 
         .file-upload-label:hover {
-            border-color: var(--primary-color);
-            background: rgba(108, 99, 255, 0.05);
+            background: #ffffff;
+            border-color: var(--premium-accent);
+            transform: scale(0.99);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
         }
 
-        .file-upload-label.has-file {
-            border-color: var(--primary-color);
-            background: rgba(108, 99, 255, 0.1);
+        .file-upload-label:hover::before {
+            transform: translateX(100%);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--premium-accent);
+            margin-bottom: 1rem;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .file-upload-label:hover .upload-icon {
+            transform: translateY(-4px);
         }
 
         .file-preview {
-            margin-top: 15px;
-            text-align: center;
+            margin-top: 1.5rem;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .file-preview.active {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--premium-border);
+            border-radius: 1rem;
+            background: #ffffff;
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .file-preview img {
-            max-width: 200px;
-            max-height: 150px;
-            border-radius: var(--radius);
-            border: 2px solid var(--border-color);
+            width: 140px;
+            height: 90px;
+            border-radius: 0.75rem;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
+        /* Buttons & Actions */
         .form-actions {
             display: flex;
-            gap: 15px;
+            align-items: center;
             justify-content: flex-end;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
+            gap: 1.5rem;
+            margin-top: 4rem;
+            padding-top: 2.5rem;
+            border-top: 1px solid var(--premium-border);
         }
 
+        .btn-cancel {
+            padding: 1.25rem 2rem;
+            background: transparent;
+            color: var(--premium-muted);
+            border: none;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .btn-cancel:hover {
+            color: var(--premium-text);
+        }
+
+        .btn-submit {
+            padding: 1.25rem 3rem;
+            background: var(--premium-accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 1rem;
+            font-weight: 600;
+            font-size: 1.0625rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+
+        .btn-submit:hover::after {
+            opacity: 1;
+        }
+
+        .btn-submit:active {
+            transform: translateY(1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Animations */
+        @keyframes slideFade {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Flash messages styling upgrade */
         .alert {
-            padding: 15px 20px;
-            border-radius: var(--radius);
-            margin-bottom: 20px;
+            padding: 1.25rem 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideFadeUp 0.4s ease-out forwards;
         }
 
         .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: #fff1f2;
+            color: #be123c;
+            border: 1px solid #fecdd3;
         }
 
         .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .help-text {
-            font-size: 12px;
-            color: var(--text-light);
-            margin-top: 5px;
-        }
-
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .form-actions {
-                flex-direction: column;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 20px;
-                align-items: flex-start;
-            }
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>🎠 Tạo Slider Mới</h1>
-        <a onclick="window.history.back()" class="btn btn-secondary">
-            ← Quay lại Marketing Dashboard
-        </a>
+
+    <div class="sidebar">
+        <div class="sidebar-brand">OELS</div>
+        <nav class="sidebar-nav">
+            <a th:href="@{/marketing}" class="nav-item">
+                <i class="ph ph-squares-four"></i> Dashboard
+            </a>
+            <a th:href="@{/marketing/sliders}" class="nav-item active">
+                <i class="ph-fill ph-image"></i> Quản lý Slider
+            </a>
+            <a th:href="@{/marketing/blogs}" class="nav-item">
+                <i class="ph ph-article"></i> Quản lý Blog
+            </a>
+        </nav>
     </div>
 
-    <!-- Flash Messages -->
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-
-    <form th:action="@{/marketing/sliders/create}" th:object="${slider}" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="title" class="required">Tiêu đề</label>
-            <input type="text"
-                   id="title"
-                   th:field="*{title}"
-                   class="form-control"
-                   placeholder="Nhập tiêu đề slider..."
-                   required>
-            <div class="help-text">Tiêu đề sẽ hiển thị trên slider</div>
-        </div>
-
-        <div class="form-group">
-            <label for="description">Mô tả</label>
-            <textarea id="description"
-                      th:field="*{description}"
-                      class="form-control"
-                      placeholder="Nhập mô tả cho slider..."></textarea>
-            <div class="help-text">Mô tả ngắn gọn về nội dung slider</div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label for="orderNumber" class="required">Thứ tự hiển thị</label>
-                <input type="number"
-                       id="orderNumber"
-                       th:field="*{orderNumber}"
-                       class="form-control"
-                       placeholder="1"
-                       min="1"
-                       required>
-                <div class="help-text">Số càng nhỏ càng hiển thị trước</div>
+    <div class="main-content">
+        <!-- Minimal Nav Header -->
+        <header class="nav-header">
+            <div class="brand">
+                <a th:href="@{/marketing/sliders}" style="color: var(--premium-muted); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s; font-weight: 500;">
+                    <i class="ph-bold ph-arrow-left"></i>
+                    <span>Quay lại danh sách</span>
+                </a>
             </div>
-
-            <div class="form-group">
-                <label for="status" class="required">Trạng thái</label>
-                <select id="status" th:field="*{status}" class="form-control" required>
-                    <option value="HIDE">Ẩn</option>
-                    <option value="SHOW">Hiển thị</option>
-                </select>
-                <div class="help-text">Chọn trạng thái hiển thị của slider</div>
+            
+            <div class="user-module" th:if="${currentUser != null}">
+                <div class="user-avatar" th:text="${#strings.substring(currentUser.fullName, 0, 1)}">U</div>
+                <span class="font-medium" th:text="${currentUser.fullName}" style="color: var(--premium-text);">User</span>
             </div>
+        </header>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success">
+            <i class="ph-fill ph-check-circle" style="font-size: 1.5rem;"></i>
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <i class="ph-fill ph-warning-circle" style="font-size: 1.5rem;"></i>
+            <span th:text="${error}"></span>
         </div>
 
-        <div class="form-group">
-            <label for="linkUrl">Link URL</label>
-            <input type="url"
-                   id="linkUrl"
-                   th:field="*{linkUrl}"
-                   class="form-control"
-                   placeholder="https://example.com">
-            <div class="help-text">Link sẽ được mở khi người dùng click vào slider (tùy chọn)</div>
-        </div>
-
-        <div class="form-group">
-            <label for="imageFile" class="required">Hình ảnh</label>
-            <div class="file-upload">
-                <input type="file"
-                       id="imageFile"
-                       th:field="*{imageFile}"
-                       accept="image/*"
-                       onchange="previewImage(this)"
-                       required>
-                <label for="imageFile" class="file-upload-label" id="fileLabel">
-                    <div>
-                        <div style="font-size: 24px; margin-bottom: 10px;">📷</div>
-                        <div>Click để chọn hình ảnh</div>
-                        <div style="font-size: 12px; color: var(--text-light); margin-top: 5px;">
-                            Hỗ trợ: JPG, PNG, GIF (Tối đa 5MB)
-                        </div>
+        <!-- Bento 2.0 Asymmetric Layout -->
+        <div class="premium-bento-layout">
+            
+            <!-- Left Panel: Context -->
+            <div class="creation-header">
+                <h1 class="premium-title">Thêm Mới<br/>Slider.</h1>
+                <p class="premium-subtitle">Thiết kế banner nổi bật để thu hút học viên ngay từ cái nhìn đầu tiên. Đảm bảo hình ảnh có độ phân giải cao và thông điệp rõ ràng.</p>
+                
+                <div style="display: flex; gap: 1rem; align-items: center; margin-top: 3rem;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: #f4f4f5; display: flex; align-items: center; justify-content: center;">
+                        <i class="ph-fill ph-lightbulb" style="font-size: 1.5rem; color: var(--premium-text);"></i>
                     </div>
-                </label>
-            </div>
-            <div class="file-preview" id="imagePreview"></div>
-        </div>
-
-        <div class="form-actions">
-            <a href="/marketing/sliders" class="btn btn-secondary">Hủy</a>
-            <button type="submit" class="btn btn-primary">Tạo Slider</button>
-        </div>
-    </form>
-</div>
-
-<script>
-    function previewImage(input) {
-        const fileLabel = document.getElementById('fileLabel');
-        const imagePreview = document.getElementById('imagePreview');
-
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-
-            // Kiểm tra kích thước file (5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('File quá lớn! Vui lòng chọn file nhỏ hơn 5MB.');
-                input.value = '';
-                return;
-            }
-
-            // Kiểm tra loại file
-            if (!file.type.startsWith('image/')) {
-                alert('Vui lòng chọn file hình ảnh!');
-                input.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                fileLabel.classList.add('has-file');
-                fileLabel.innerHTML = `
                     <div>
-                        <div style="font-size: 24px; margin-bottom: 10px;">✅</div>
-                        <div>Đã chọn: ${file.name}</div>
-                        <div style="font-size: 12px; color: var(--text-light); margin-top: 5px;">
-                            Click để chọn file khác
-                        </div>
-                    </div>
-                `;
-
-                imagePreview.innerHTML = `
-                    <div style="margin-bottom: 10px; font-weight: 600;">Xem trước:</div>
-                    <img src="${e.target.result}" alt="Preview" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 2px solid var(--border-color);">
-                `;
-            };
-            reader.readAsDataURL(file);
-        } else {
-            fileLabel.classList.remove('has-file');
-            fileLabel.innerHTML = `
-                <div>
-                    <div style="font-size: 24px; margin-bottom: 10px;">📷</div>
-                    <div>Click để chọn hình ảnh</div>
-                    <div style="font-size: 12px; color: var(--text-light); margin-top: 5px;">
-                        Hỗ trợ: JPG, PNG, GIF (Tối đa 5MB)
+                        <div style="font-weight: 700; color: var(--premium-text); font-size: 0.875rem;">Mẹo thiết kế</div>
+                        <div style="color: var(--premium-muted); font-size: 0.875rem;">Tỉ lệ ảnh khuyến nghị 16:9.</div>
                     </div>
                 </div>
-            `;
-            imagePreview.innerHTML = '';
-        }
-    }
+            </div>
 
-    // Form validation
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const title = document.getElementById('title').value.trim();
-        const orderNumber = document.getElementById('orderNumber').value;
-        const imageFile = document.getElementById('imageFile').files[0];
+            <!-- Right Panel: Form Area -->
+            <div class="glass-panel">
+                <form th:action="@{/marketing/sliders/create}" th:object="${slider}" method="post" enctype="multipart/form-data">
+                    
+                    <div class="form-group">
+                        <label for="title" class="required">Tiêu đề Banner</label>
+                        <input type="text" id="title" th:field="*{title}" class="form-control" placeholder="Khóa học tiếng Anh giao tiếp..." required>
+                    </div>
 
-        if (!title) {
-            e.preventDefault();
-            alert('Vui lòng nhập tiêu đề!');
-            document.getElementById('title').focus();
-            return;
+                    <div class="form-group">
+                        <label for="description">Mô tả chi tiết</label>
+                        <textarea id="description" th:field="*{description}" class="form-control" placeholder="Viết một đoạn mô tả ngắn gọn, hấp dẫn..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="orderNumber" class="required">Thứ tự hiển thị</label>
+                            <input type="number" id="orderNumber" th:field="*{orderNumber}" class="form-control" placeholder="1" min="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status" class="required">Trạng thái</label>
+                            <select id="status" th:field="*{status}" class="form-control" required>
+                                <option value="SHOW">Hiển thị công khai</option>
+                                <option value="HIDE">Tạm ẩn</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="linkUrl">Đường dẫn đích (URL)</label>
+                        <input type="url" id="linkUrl" th:field="*{linkUrl}" class="form-control" placeholder="https://example.com/course/...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="required">Tệp hình ảnh</label>
+                        <div class="file-upload">
+                            <input type="file" id="imageFile" th:field="*{imageFile}" accept="image/*" onchange="previewImage(this)" required>
+                            <label for="imageFile" class="file-upload-label" id="fileLabel">
+                                <i class="ph-duotone ph-cloud-arrow-up upload-icon"></i>
+                                <span style="font-weight: 600; color: var(--premium-text); font-size: 1.125rem;">Kéo thả hoặc nhấn để tải lên</span>
+                                <span style="color: var(--premium-muted); font-size: 0.875rem; margin-top: 0.5rem;">Hỗ trợ JPG, PNG, WEBP (Tối đa 5MB)</span>
+                            </label>
+                        </div>
+                        <div class="file-preview" id="imagePreviewContainer">
+                            <img id="imagePreview" src="" alt="Preview">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; color: var(--premium-text); font-size: 0.875rem; margin-bottom: 0.25rem;" id="fileName">filename.jpg</div>
+                                <div style="color: var(--premium-muted); font-size: 0.75rem;">Đã sẵn sàng để tải lên</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="/marketing/sliders" class="btn-cancel">Hủy bỏ</a>
+                        <button type="submit" class="btn-submit">
+                            Tạo Slider <i class="ph-bold ph-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function previewImage(input) {
+            const fileLabel = document.getElementById('fileLabel');
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            const fileName = document.getElementById('fileName');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Size validation (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File quá lớn! Vui lòng chọn file nhỏ hơn 5MB.');
+                    input.value = '';
+                    resetPreview();
+                    return;
+                }
+
+                // Type validation
+                if (!file.type.startsWith('image/')) {
+                    alert('Vui lòng chọn file hình ảnh hợp lệ!');
+                    input.value = '';
+                    resetPreview();
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fileLabel.style.display = 'none';
+                    previewContainer.classList.add('active');
+                    imagePreview.src = e.target.result;
+                    fileName.textContent = file.name;
+                    
+                    // Add change button with premium styling
+                    let changeBtn = document.getElementById('btnChangeFile');
+                    if (!changeBtn) {
+                        changeBtn = document.createElement('button');
+                        changeBtn.id = 'btnChangeFile';
+                        changeBtn.type = 'button';
+                        changeBtn.className = 'btn-cancel';
+                        changeBtn.style.padding = '0.5rem 1rem';
+                        changeBtn.style.borderRadius = '0.75rem';
+                        changeBtn.style.border = '1px solid var(--premium-border)';
+                        changeBtn.innerHTML = '<i class="ph-bold ph-arrows-clockwise"></i> Chọn lại';
+                        changeBtn.onclick = () => document.getElementById('imageFile').click();
+                        previewContainer.appendChild(changeBtn);
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                resetPreview();
+            }
+
+            function resetPreview() {
+                fileLabel.style.display = 'flex';
+                previewContainer.classList.remove('active');
+                imagePreview.src = '';
+            }
         }
 
-        if (!orderNumber || orderNumber < 1) {
-            e.preventDefault();
-            alert('Vui lòng nhập thứ tự hiển thị hợp lệ!');
-            document.getElementById('orderNumber').focus();
-            return;
-        }
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value.trim();
+            const orderNumber = document.getElementById('orderNumber').value;
+            const imageFile = document.getElementById('imageFile').files[0];
 
-        if (!imageFile) {
-            e.preventDefault();
-            alert('Vui lòng chọn hình ảnh!');
-            document.getElementById('imageFile').focus();
-            return;
-        }
-    });
-</script>
+            if (!title) {
+                e.preventDefault();
+                alert('Vui lòng nhập tiêu đề!');
+                document.getElementById('title').focus();
+                return;
+            }
+
+            if (!orderNumber || orderNumber < 1) {
+                e.preventDefault();
+                alert('Vui lòng nhập thứ tự hiển thị hợp lệ!');
+                document.getElementById('orderNumber').focus();
+                return;
+            }
+
+            if (!imageFile) {
+                e.preventDefault();
+                alert('Vui lòng chọn hình ảnh!');
+                document.getElementById('imageFile').focus();
+                return;
+            }
+        });
+    </script>
 </body>
 </html>
-

@@ -131,7 +131,7 @@ public class MarketingController {
     @GetMapping("/sliders/create")
     public String createSliderForm(Model model) {
         model.addAttribute("slider", new SliderCreateUpdateDto());
-        return "slider/create";
+        return "marketing/slider-create";
     }
 
     // Xá»­ lÃ½ táº¡o slider má»›i
@@ -161,7 +161,7 @@ public class MarketingController {
             model.addAttribute("slider", dto);
             model.addAttribute("sliderId", id);
             model.addAttribute("currentImageUrl", slider.getImageUrl());
-            return "slider/update";
+            return "marketing/slider-update";
         } catch (Exception e) {
             return "redirect:/marketing/sliders?error=" + e.getMessage();
         }
